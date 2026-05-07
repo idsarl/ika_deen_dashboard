@@ -1,0 +1,63 @@
+<div class="login-page">
+  <div class="login-container">
+    <!-- Left Side: Image & Branding -->
+    <div class="login-left">
+      <div class="image-overlay"></div>
+      <img src="Islam_page.jpg" alt="Islamic Background" class="bg-image">
+      <div class="branding-content">
+        <h1>La sagesse <span>commence ici</span></h1>
+        <p>Gérez votre plateforme Ikadeen avec sérénité et efficacité.</p>
+      </div>
+    </div>
+
+    <!-- Right Side: Login Form -->
+    <div class="login-right">
+      <div class="form-wrapper">
+        <div class="logo-area">
+          <div class="logo-icon">I</div>
+          <h2>Ikadeen</h2>
+        </div>
+        
+        <div class="welcome-text">
+          <h3>Heureux de vous revoir !</h3>
+          <p>Connectez-vous à votre espace administrateur</p>
+        </div>
+
+        <form (submit)="onSubmit($event)" [formGroup]="loginForm">
+          <div class="form-group">
+            <label for="email">Adresse Email</label>
+            <div class="input-control">
+              <input type="email" id="email" formControlName="email" placeholder="admin@ikadeen.com" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="password">Mot de passe</label>
+            <div class="input-control">
+              <input type="password" id="password" formControlName="password" placeholder="••••••••" required>
+            </div>
+          </div>
+
+          <div class="form-options">
+            <label class="remember-me">
+              <input type="checkbox"> Souvenir de moi
+            </label>
+          </div>
+
+          <div class="error-message" *ngIf="errorMessage">
+            {{ errorMessage }}
+          </div>
+
+          <button type="submit" [disabled]="isLoading" [class.loading]="isLoading">
+            <span *ngIf="!isLoading">Se connecter</span>
+            <div class="spinner" *ngIf="isLoading"></div>
+          </button>
+        </form>
+
+        <div class="footer-text">
+          <p>&copy; 2026 Ikadeen Dashboard. Version 1.0</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
