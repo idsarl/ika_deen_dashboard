@@ -1,7 +1,8 @@
+/* Importation des polices Google Fonts : Amiri pour l'arabe/style islamique, Outfit pour le texte moderne */
 @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  /* Default: Normal Theme (Islamic Cream) */
+  /* Thème par défaut : Normal (Crème Islamique) */
   --bg-color: #f6f5ed;
   --sidebar-bg: #ffffff;
   --card-bg: #ffffff;
@@ -14,7 +15,7 @@
 }
 
 [data-theme='dark'] {
-  /* Dark Theme (Emerald Night) */
+  /* Thème Sombre (Nuit Émeraude) */
   --bg-color: #020617;
   --sidebar-bg: #0f172a;
   --card-bg: #1e293b;
@@ -27,7 +28,7 @@
 }
 
 [data-theme='light'] {
-  /* Light Theme (Clean White) */
+  /* Thème Clair (Blanc Pur) */
   --bg-color: #f8fafc;
   --sidebar-bg: #ffffff;
   --card-bg: #ffffff;
@@ -39,19 +40,23 @@
   --border-color: #e2e8f0;
 }
 
+/* Reset CSS de base */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+/* Styles globaux pour le corps de la page */
 body {
   font-family: 'Outfit', sans-serif;
   background: var(--bg-color);
   color: var(--text-main);
+  /* Transition fluide pour le changement de thème */
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Personnalisation de la barre de défilement */
 ::-webkit-scrollbar {
   width: 6px;
 }
