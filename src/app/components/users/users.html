@@ -1,0 +1,133 @@
+<div class="users-container">
+  <div class="users-header">
+    <div class="header-info">
+      <h2>Gestion des Utilisateurs</h2>
+      <p>Consultez, modifiez le statut ou supprimez les membres de la plateforme.</p>
+    </div>
+    <button class="refresh-btn" (click)="loadUsers()" [disabled]="isLoading">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18">
+        <path d="M23 4v6h-6"></path>
+        <path d="M1 20v-6h6"></path>
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+      </svg>
+      Actualiser
+    </button>
+  </div>
+
+  <div class="error-banner" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
+
+  <div class="table-wrapper card">
+    <div class="loading-overlay" *ngIf="isLoading">
+      <div class="spinner"></div>
+    </div>
+
+    <table class="users-table">
+      <thead>
+        <tr>
+          <th>Utilisateur</th>
+          <th>Téléphone</th>
+          <th>Rôle</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of users">
+          <td>
+            <div class="user-cell">
+              <div class="avatar">{{ user.email.charAt(0).toUpperCase() }}</div>
+              <div class="info">
+                <span class="email">{{ user.email }}</span>
+                <span class="id">ID: {{ user.id }}</span>
+              </div>
+            </div>
+          </td>
+          <td>{{ user.telephone || 'N/A' }}</td>
+          <td>
+            <span class="badge" [class.badge-admin]="user.role === 'ADMIN'">
+              {{ user.role }}
+            </span>
+          </td>
+          <td>
+            <div class="status-toggle" [class.disabled]="user.role === 'ADMIN'" (click)="toggleStatus(user)">
+              <div class="toggle-track" [class.active]="user.estActif">
+                <div class="toggle-thumb"></div>
+              </div>
+              <span class="status-label">{{ user.estActif ? 'Actif' : 'Inactif' }}</span>
+            </div>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button class="btn-view" (click)="viewUserDetails(user)" title="Voir détails">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+              <button 
+                class="btn-delete" 
+                (click)="onDeleteUser(user.id)" 
+                [disabled]="user.role === 'ADMIN'"
+                [title]="user.role === 'ADMIN' ? 'Impossible de supprimer un administrateur' : 'Supprimer'"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  <line x1="10" y1="11" x2="10" y2="17"></line>
+                  <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+  <div class="empty-state" *ngIf="!isLoading && users.length === 0">
+      <p>Aucun utilisateur trouvé.</p>
+    </div>
+  </div>
+
+  <!-- Modal Détails Utilisateur -->
+  <div class="modal-overlay" *ngIf="selectedUser" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Détails de l'utilisateur</h3>
+        <button class="close-btn" (click)="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="user-profile-header">
+          <div class="avatar-large">{{ selectedUser.email.charAt(0).toUpperCase() }}</div>
+          <div class="user-main-info">
+            <h4>{{ selectedUser.email }}</h4>
+            <span class="badge" [class.badge-admin]="selectedUser.role === 'ADMIN'">{{ selectedUser.role }}</span>
+          </div>
+        </div>
+        
+        <div class="details-grid">
+          <div class="detail-item">
+            <label>ID Unique</label>
+            <p>{{ selectedUser.id }}</p>
+          </div>
+          <div class="detail-item">
+            <label>Téléphone</label>
+            <p>{{ selectedUser.telephone || 'Non renseigné' }}</p>
+          </div>
+          <div class="detail-item">
+            <label>Statut du compte</label>
+            <p [class.status-active]="selectedUser.estActif">{{ selectedUser.estActif ? 'Actif' : 'Désactivé' }}</p>
+          </div>
+          <div class="detail-item">
+            <label>Vérification Email</label>
+            <p [class.status-active]="selectedUser.estVerifie">{{ selectedUser.estVerifie ? 'Vérifié' : 'En attente' }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" (click)="closeModal()">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,154 @@
+<div class="form-container">
+  <div class="form-header">
+    <button class="btn-back" routerLink="/dashboard/mosquees">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      Retour
+    </button>
+    <h2>{{ isEditMode ? 'Modifier la mosquée' : 'Ajouter une nouvelle mosquée' }}</h2>
+  </div>
+
+  <form [formGroup]="mosqueeForm" (ngSubmit)="onSubmit()" class="premium-form">
+    
+    <div class="form-grid">
+      <!-- Section 1: Informations de base -->
+      <section class="form-section card">
+        <div class="section-title">
+          <span class="icon">📝</span>
+          <h3>Informations Générales</h3>
+        </div>
+        
+        <div class="form-group" formGroupName="nom">
+          <label>Nom de la mosquée (FR) *</label>
+          <input type="text" formControlName="fr" placeholder="Ex: Grande Mosquée de Bamako">
+        </div>
+
+        <div class="form-group" formGroupName="nom">
+          <label>Nom de la mosquée (AR)</label>
+          <input type="text" formControlName="ar" dir="rtl" class="arabic-input" placeholder="المسجد الكبير">
+        </div>
+
+        <div class="form-group" formGroupName="description">
+          <label>Description (FR)</label>
+          <textarea formControlName="fr" rows="3"></textarea>
+        </div>
+      </section>
+
+      <!-- Section 2: Localisation & Carte -->
+      <section class="form-section card">
+        <div class="section-title">
+          <span class="icon">📍</span>
+          <h3>Localisation GPS</h3>
+        </div>
+        
+        <p class="instruction">Cliquez sur la carte ou déplacez le marqueur pour définir la position exacte.</p>
+        <div id="map" class="map-container"></div>
+        
+        <div class="coords-row">
+          <div class="form-group">
+            <label>Latitude</label>
+            <input type="number" formControlName="latitude" step="any" readonly>
+          </div>
+          <div class="form-group">
+            <label>Longitude</label>
+            <input type="number" formControlName="longitude" step="any" readonly>
+          </div>
+        </div>
+
+        <div formGroupName="adresse" class="address-grid">
+          <div class="form-group full">
+            <label>Rue / Quartier</label>
+            <input type="text" formControlName="rue">
+          </div>
+          <div class="form-group">
+            <label>Ville *</label>
+            <input type="text" formControlName="ville">
+          </div>
+          <div class="form-group">
+            <label>Pays *</label>
+            <input type="text" formControlName="pays">
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: Horaires de Prière -->
+      <section class="form-section card">
+        <div class="section-title">
+          <span class="icon">🕌</span>
+          <h3>Horaires de Prière</h3>
+        </div>
+        <div formGroupName="horairesPriere" class="times-grid">
+          <div class="form-group"><label>Fajr</label><input type="time" formControlName="fajr"></div>
+          <div class="form-group"><label>Dhuhr</label><input type="time" formControlName="dhuhr"></div>
+          <div class="form-group"><label>Asr</label><input type="time" formControlName="asr"></div>
+          <div class="form-group"><label>Maghrib</label><input type="time" formControlName="maghrib"></div>
+          <div class="form-group"><label>Isha</label><input type="time" formControlName="isha"></div>
+          <div class="form-group"><label>Jumu'a</label><input type="time" formControlName="jumua"></div>
+        </div>
+      </section>
+
+      <!-- Section 4: Équipements & Contact -->
+      <section class="form-section card">
+        <div class="section-title">
+          <span class="icon">✨</span>
+          <h3>Services & Contact</h3>
+        </div>
+        
+        <div formGroupName="equipements" class="checkbox-group">
+          <label class="checkbox-item">
+            <input type="checkbox" formControlName="parking">
+            Parking disponible
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox" formControlName="sectionFemmes">
+            Section Femmes
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox" formControlName="accesHandicapes">
+            Accès Handicapés
+          </label>
+        </div>
+
+        <div formGroupName="contact" class="contact-grid">
+          <div class="form-group">
+            <label>Téléphone</label>
+            <input type="text" formControlName="telephone">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" formControlName="email">
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 5: Imam -->
+      <section class="form-section card full-width">
+        <div class="section-title">
+          <span class="icon">👤</span>
+          <h3>Informations sur l'Imam</h3>
+        </div>
+        <div formGroupName="imam" class="imam-grid">
+          <div class="form-group">
+            <label>Nom de l'Imam</label>
+            <input type="text" formControlName="nom">
+          </div>
+          <div class="form-group">
+            <label>Bio courte</label>
+            <textarea formControlName="bio" rows="2"></textarea>
+          </div>
+          <div class="form-group">
+            <label>URL Photo</label>
+            <input type="text" formControlName="photoUrl">
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn-cancel" routerLink="/dashboard/mosquees">Annuler</button>
+      <button type="submit" class="btn-submit" [disabled]="mosqueeForm.invalid || isLoading">
+        <span *ngIf="!isLoading">{{ isEditMode ? 'Enregistrer les modifications' : 'Créer la mosquée' }}</span>
+        <div class="spinner" *ngIf="isLoading"></div>
+      </button>
+    </div>
+  </form>
+</div>

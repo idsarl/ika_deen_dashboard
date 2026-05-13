@@ -1,0 +1,199 @@
+<header class="main-header">
+  <div class="welcome-section">
+    <h1>Salam, {{ user?.email?.split('@')[0] }}!</h1>
+    <p>Aperçu de votre plateforme Ikadeen aujourd'hui.</p>
+  </div>
+  <div class="header-right">
+    <div class="search-container">
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" placeholder="Chercher partout..." (input)="onSearch($event)" [value]="searchTerm">
+        <button class="close-search" *ngIf="isSearching" (click)="closeSearch()">✕</button>
+      </div>
+
+      <!-- Dropdown des résultats -->
+      <div class="search-results-dropdown card" *ngIf="isSearching">
+        <!-- Section Mosquées -->
+        <div class="result-section" *ngIf="searchResultMosquees.length > 0">
+          <label>Mosquées</label>
+          <div class="result-item" *ngFor="let m of searchResultMosquees" routerLink="/dashboard/mosquees">
+            <div class="res-icon">🕌</div>
+            <div class="res-info">
+              <span class="res-name">{{ getNom(m) }}</span>
+              <span class="res-sub">{{ m.adresse.ville }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section Utilisateurs -->
+        <div class="result-section" *ngIf="searchResultUsers.length > 0">
+          <label>Utilisateurs</label>
+          <div class="result-item" *ngFor="let u of searchResultUsers" routerLink="/dashboard/users">
+            <div class="res-icon">👤</div>
+            <div class="res-info">
+              <span class="res-name">{{ u.email }}</span>
+              <span class="res-sub">{{ u.role }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Aucun résultat -->
+        <div class="no-results" *ngIf="searchResultMosquees.length === 0 && searchResultUsers.length === 0">
+          Aucun résultat trouvé pour "{{ searchTerm }}"
+        </div>
+      </div>
+    </div>
+    <button class="upgrade-btn">Stats Mali</button>
+  </div>
+</header>
+
+<div class="dashboard-grid">
+  <!-- Main Activity Card -->
+  <div class="grid-item main-activity">
+    <div class="card">
+      <div class="card-header">
+        <h3>Activités de la Communauté</h3>
+        <span class="more-options">...</span>
+      </div>
+      <div class="visual-data">
+        <div class="circle circle-1"><span>250<br>Dons</span></div>
+        <div class="circle circle-2"><span>{{ totalUsers }}<br>Users</span></div>
+        <div class="circle circle-3"><span>{{ totalMosquees }}<br>Mosquées</span></div>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><span class="dot yellow"></span> Inscriptions</div>
+        <div class="legend-item"><span class="dot green"></span> Prières</div>
+        <div class="legend-item"><span class="dot brown"></span> Dons</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Prayer Times Widget -->
+  <div class="grid-item prayer-times">
+    <div class="card dark-card">
+      <div class="card-header">
+        <h3>Horaires ({{ profil?.ville || 'Position' }})</h3>
+        <span class="current-month">{{ horaires?.date | date:'MMMM' }} <i class="icon-chevron-down"></i></span>
+      </div>
+      <div class="prayer-list" *ngIf="horaires">
+        <div class="prayer-item" [class.active]="nextPrayerName === 'Fajr'">
+          <span>Fajr</span> <span>{{ horaires.fajr }}</span>
+        </div>
+        <div class="prayer-item" [class.active]="nextPrayerName === 'Dhuhr'">
+          <span>Dhuhr</span> <span>{{ horaires.dhuhr }}</span>
+        </div>
+        <div class="prayer-item" [class.active]="nextPrayerName === 'Asr'">
+          <span>Asr</span> <span>{{ horaires.asr }}</span>
+        </div>
+        <div class="prayer-item" [class.active]="nextPrayerName === 'Maghrib'">
+          <span>Maghrib</span> <span>{{ horaires.maghrib }}</span>
+        </div>
+        <div class="prayer-item" [class.active]="nextPrayerName === 'Isha'">
+          <span>Isha</span> <span>{{ horaires.isha }}</span>
+        </div>
+      </div>
+      <div class="loading-mini" *ngIf="!horaires">Chargement...</div>
+      
+      <div class="next-prayer" *ngIf="horaires">
+        <p>Prochaine : {{ nextPrayerName }} (dans {{ remainingTime }})</p>
+        <div class="progress-bar">
+          <div class="progress" [style.width.%]="progress"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Social Impact (Progress bar style) -->
+  <div class="grid-item impact-widget">
+    <div class="card">
+      <div class="card-header">
+        <h4>Objectif Forage Kayes</h4>
+        <span class="badge success">68%</span>
+      </div>
+      <div class="progress-stat">
+        <div class="linear-progress-bar">
+          <div class="progress-fill" style="width: 68%"></div>
+        </div>
+        <div class="progress-labels">
+          <span>1.2M CFA collectés</span>
+          <span>Objectif: 2M</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Spiritual Habits (List style) -->
+  <div class="grid-item habits-widget">
+    <div class="card">
+      <div class="card-header">
+        <h3>Objectifs Spirituels</h3>
+        <button class="add-btn">Détails</button>
+      </div>
+      <div class="habit-list">
+        <div class="habit-item">
+          <div class="h-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></div>
+          <div class="h-info">
+            <p>Prières ({{ profil?.statistiques?.totalPrieresEnregistrees || 0 }})</p>
+            <div class="mini-bar"><div class="fill" [style.width.%]="(profil?.statistiques?.totalPrieresEnregistrees || 0) % 100"></div></div>
+          </div>
+        </div>
+        <div class="habit-item">
+          <div class="h-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></div>
+          <div class="h-info">
+            <p>Dhikr ({{ profil?.statistiques?.totalTasbih || 0 }})</p>
+            <div class="mini-bar"><div class="fill" [style.width.%]="(profil?.statistiques?.totalTasbih || 0) % 100"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Activities -->
+  <div class="grid-item recent-activities">
+    <div class="card">
+      <div class="card-header">
+        <h3>Dernières Inscriptions</h3>
+        <button class="add-btn" routerLink="/dashboard/mosquees">Voir tout +</button>
+      </div>
+      <div class="activity-list" *ngIf="filteredMosquees.length > 0">
+        <div class="activity-row" *ngFor="let m of filteredMosquees">
+          <div class="icon-box">{{ getInitial(m) }}</div>
+          <div class="info">
+            <p class="title">{{ getNom(m) }}</p>
+            <p class="sub">{{ m.adresse.ville }}, {{ m.adresse.pays }}</p>
+          </div>
+          <div class="status">Nouveau</div>
+        </div>
+      </div>
+      <div class="empty-mini" *ngIf="filteredMosquees.length === 0">
+        {{ searchTerm ? 'Aucun résultat pour "' + searchTerm + '"' : 'Aucune mosquée récente.' }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback/Comments -->
+  <div class="grid-item feedback-widget">
+    <div class="card">
+      <div class="card-header">
+        <h3>Retours Utilisateurs</h3>
+        <span class="count">4 nouveaux</span>
+      </div>
+      <div class="feedback-list">
+        <div class="feedback-item">
+          <div class="f-avatar">A</div>
+          <div class="f-info">
+            <p class="f-user">Amadou D.</p>
+            <p class="f-text">"L'app est géniale pour les horaires."</p>
+          </div>
+        </div>
+        <div class="feedback-item">
+          <div class="f-avatar">S</div>
+          <div class="f-info">
+            <p class="f-user">Salif K.</p>
+            <p class="f-text">"Besoin de plus de radios à Gao."</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

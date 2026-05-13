@@ -145,37 +145,98 @@
   transform: scale(1.2);
 }
 
-.user-profile {
+.user-profile-nav {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px;
-  border-radius: 16px;
-  cursor: pointer;
-  transition: background 0.3s;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15px;
+  transition: all 0.3s;
 }
 
-.user-profile:hover { background: var(--bg-color); }
+.user-info-side {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  flex: 1;
+  min-width: 0;
+}
+
+.user-info-side:hover .avatar {
+  transform: scale(1.1);
+  box-shadow: 0 0 15px var(--primary);
+}
 
 .avatar {
   width: 40px;
   height: 40px;
-  background: var(--accent);
+  background: var(--primary);
   color: white;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: bold;
+  font-weight: 700;
   flex-shrink: 0;
+  transition: all 0.3s;
 }
 
 .user-meta {
-  overflow: hidden;
+  min-width: 0;
 }
 
-.user-email { font-weight: 700; font-size: 0.9rem; }
-.logout-text { font-size: 0.75rem; color: var(--text-muted); }
+.user-email {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.view-profile {
+  font-size: 0.75rem;
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.logout-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.logout-btn:hover {
+  background: #fff5f5;
+  color: #ef4444;
+}
+
+/* Animations de transition */
+.loading-mini, .empty-mini {
+  padding: 1rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 
 /* Main Content */
 .main-content {
@@ -189,12 +250,25 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
+  margin-bottom: 3rem; /* Espace ajouté pour aérer le dashboard */
+  padding-bottom: 0.5rem;
+}
+
+.search-bar:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(6, 78, 59, 0.05);
+  transform: translateY(-1px);
 }
 
 .welcome-section h1 { font-size: 2.2rem; font-weight: 800; }
 .welcome-section p { color: var(--text-muted); }
 
 .header-right { display: flex; gap: 15px; }
+
+.search-container {
+  position: relative;
+  z-index: 100;
+}
 
 .search-bar {
   background: var(--card-bg);
@@ -205,14 +279,98 @@
   align-items: center;
   gap: 10px;
   border: 1px solid var(--border-color);
+  width: 300px;
+  transition: all 0.3s;
 }
 
 .search-bar input {
   border: none;
   background: none;
   outline: none;
-  width: 200px;
+  flex: 1;
   color: var(--text-main);
+}
+
+.close-search {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1.1rem;
+}
+
+.search-results-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  right: 0;
+  width: 350px;
+  max-height: 400px;
+  overflow-y: auto;
+  z-index: 1001;
+  padding: 1rem;
+  animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.result-section {
+  margin-bottom: 1.5rem;
+}
+
+.result-section label {
+  display: block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: var(--primary);
+  font-weight: 800;
+  margin-bottom: 0.8rem;
+  letter-spacing: 1px;
+}
+
+.result-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.8rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.result-item:hover {
+  background: var(--bg-color);
+  transform: translateX(5px);
+}
+
+.res-icon {
+  font-size: 1.2rem;
+}
+
+.res-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.res-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-main);
+}
+
+.res-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.no-results {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-muted);
+  font-style: italic;
 }
 
 .add-btn {

@@ -1,0 +1,138 @@
+<div class="mosquees-container">
+  <div class="page-header">
+    <div class="header-info">
+      <h2>Répertoire des Mosquées</h2>
+      <p>Gérez les lieux de culte, les horaires et les informations communautaires.</p>
+    </div>
+    <div class="header-actions">
+      <button class="refresh-btn" (click)="loadMosquees()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+      </button>
+      <button class="add-btn" routerLink="/dashboard/mosquees/new">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        Nouvelle Mosquée
+      </button>
+    </div>
+  </div>
+
+  <div class="mosquees-grid" *ngIf="!isLoading">
+    <div class="mosquee-card" *ngFor="let mosquee of mosquees">
+      <div class="card-image">
+        <div class="image-placeholder">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48">
+            <path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-4a3 3 0 0 1 6 0v4"></path>
+          </svg>
+        </div>
+        <div class="rating-badge">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="12"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
+          {{ mosquee.evaluationMoyenne | number:'1.1-1' }}
+        </div>
+      </div>
+
+      <div class="card-content">
+        <div class="title-row">
+          <h3>{{ getNom(mosquee) }}</h3>
+          <span class="arabic-title" *ngIf="mosquee.nom['ar']">{{ mosquee.nom['ar'] }}</span>
+        </div>
+        
+        <div class="info-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          <span>{{ mosquee.adresse.ville }}, {{ mosquee.adresse.pays }}</span>
+        </div>
+
+        <div class="info-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          <span>Imam : {{ mosquee.imam.nom || 'Non renseigné' }}</span>
+        </div>
+
+        <div class="equipements">
+          <span [class.active]="mosquee.equipements.parking" title="Parking">P</span>
+          <span [class.active]="mosquee.equipements.sectionFemmes" title="Section Femmes">F</span>
+          <span [class.active]="mosquee.equipements.accesHandicapes" title="Accès Handicapés">H</span>
+        </div>
+
+        <div class="card-footer">
+          <button class="btn-view-icon" (click)="viewDetails(mosquee)" title="Voir tout">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+          <button class="btn-edit" [routerLink]="['/dashboard/mosquees/edit', mosquee.id]">Modifier</button>
+          <button class="btn-delete" (click)="onDelete(mosquee.id!)">Supprimer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Chargement des mosquées...</p>
+  </div>
+
+  <div class="empty-state" *ngIf="!isLoading && mosquees.length === 0">
+    <div class="empty-icon">🕌</div>
+    <h3>Aucune mosquée trouvée</h3>
+    <p>Commencez par en ajouter une à votre répertoire.</p>
+  </div>
+
+  <!-- Modal Détails Mosquée -->
+  <div class="modal-overlay" *ngIf="selectedMosquee" (click)="closeModal()">
+    <div class="modal-content large-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Détails : {{ getNom(selectedMosquee) }}</h3>
+        <button class="close-btn" (click)="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body scrollable-body">
+        <div class="mosquee-details-header">
+          <div class="mosquee-main-info">
+            <h4>{{ getNom(selectedMosquee) }}</h4>
+            <p class="arabic-text" *ngIf="selectedMosquee.nom['ar']">{{ selectedMosquee.nom['ar'] }}</p>
+          </div>
+          <div class="rating-info">
+            <span class="rating-val">{{ selectedMosquee.evaluationMoyenne }} ⭐</span>
+            <span class="avis-count">({{ selectedMosquee.nombreAvis }} avis)</span>
+          </div>
+        </div>
+
+        <div class="details-section">
+          <h5>📍 Localisation & Contact</h5>
+          <div class="details-grid">
+            <div class="detail-item"><label>Adresse</label><p>{{ selectedMosquee.adresse.rue }}, {{ selectedMosquee.adresse.ville }}</p></div>
+            <div class="detail-item"><label>Pays</label><p>{{ selectedMosquee.adresse.pays }}</p></div>
+            <div class="detail-item"><label>Téléphone</label><p>{{ selectedMosquee.contact.telephone || 'N/A' }}</p></div>
+            <div class="detail-item"><label>Email</label><p>{{ selectedMosquee.contact.email || 'N/A' }}</p></div>
+          </div>
+        </div>
+
+        <div class="details-section">
+          <h5>🕒 Horaires de Prière</h5>
+          <div class="times-details-grid">
+            <div class="time-box"><span>Fajr</span><strong>{{ selectedMosquee.horairesPriere.fajr }}</strong></div>
+            <div class="time-box"><span>Dhuhr</span><strong>{{ selectedMosquee.horairesPriere.dhuhr }}</strong></div>
+            <div class="time-box"><span>Asr</span><strong>{{ selectedMosquee.horairesPriere.asr }}</strong></div>
+            <div class="time-box"><span>Maghrib</span><strong>{{ selectedMosquee.horairesPriere.maghrib }}</strong></div>
+            <div class="time-box"><span>Isha</span><strong>{{ selectedMosquee.horairesPriere.isha }}</strong></div>
+            <div class="time-box active"><span>Jumu'a</span><strong>{{ selectedMosquee.horairesPriere.jumua }}</strong></div>
+          </div>
+        </div>
+
+        <div class="details-section">
+          <h5>👤 Imam</h5>
+          <div class="imam-details">
+            <div class="imam-photo" *ngIf="selectedMosquee.imam.photoUrl">
+              <img [src]="selectedMosquee.imam.photoUrl" alt="Photo Imam">
+            </div>
+            <div class="imam-text">
+              <h6>{{ selectedMosquee.imam.nom || 'Inconnu' }}</h6>
+              <p>{{ selectedMosquee.imam.bio || 'Pas de biographie disponible.' }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" (click)="closeModal()">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>

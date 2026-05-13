@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 
 // Définition des types de thèmes disponibles pour l'application
@@ -9,7 +9,7 @@ type Theme = 'normal' | 'dark' | 'light';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
@@ -20,10 +20,14 @@ export class DashboardComponent implements OnInit {
 
   // Informations de l'utilisateur connecté
   user: any;
+
+
   // Thème actuel de l'application
   currentTheme: Theme = 'normal';
+
+  
   // État d'extension de la barre latérale (sidebar)
-  isExpanded = false;
+  isExpanded = true;
 
   /**
    * Initialisation du composant.
@@ -31,7 +35,7 @@ export class DashboardComponent implements OnInit {
    */
   ngOnInit() {
     this.user = this.authService.getUser();
-    const savedTheme = localStorage.getItem('theme') as Theme;
+    const savedTheme = localStorage.getItem('ika_theme') as Theme;
     if (savedTheme) {
       this.setTheme(savedTheme);
     }

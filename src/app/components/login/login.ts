@@ -28,8 +28,12 @@ export class LoginComponent {
 
   // Indicateur de chargement pendant la requête vers l'API
   isLoading = false;
+
+
   // Message d'erreur à afficher en cas d'échec de connexion
   errorMessage = '';
+
+  
 
   /**
    * Gère la soumission du formulaire de connexion.

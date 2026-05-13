@@ -1,0 +1,149 @@
+<div class="profil-container" *ngIf="!isLoading">
+  <!-- En-tête du profil -->
+  <div class="profil-header card">
+    <div class="cover-photo"></div>
+    <div class="profile-info-summary">
+      <div class="avatar-container">
+        <img [src]="profil?.avatarUrl || 'https://ui-avatars.com/api/?name=' + profil?.nomAffichage" alt="Avatar">
+        <button class="edit-avatar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+        </button>
+      </div>
+      <div class="text-info">
+        <h2>{{ profil?.nomAffichage }}</h2>
+        <p>{{ profil?.ville }}, {{ profil?.pays }}</p>
+      </div>
+      <div class="stats-row" *ngIf="profil?.statistiques">
+        <div class="stat-item">
+          <strong>{{ profil?.statistiques?.totalPrieresEnregistrees }}</strong>
+          <span>Prières</span>
+        </div>
+        <div class="stat-item">
+          <strong>{{ profil?.statistiques?.serieJoursActifs }}</strong>
+          <span>Série (jours)</span>
+        </div>
+        <div class="stat-item">
+          <strong>{{ profil?.statistiques?.totalTasbih }}</strong>
+          <span>Tasbih</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation par onglets -->
+  <div class="tabs-nav">
+    <button [class.active]="activeTab === 'personal'" (click)="switchTab('personal')">Informations Personnelles</button>
+    <button [class.active]="activeTab === 'settings'" (click)="switchTab('settings')">Réglages & Préférences</button>
+  </div>
+
+  <form [formGroup]="profilForm" (ngSubmit)="onSubmit()">
+    <!-- Onglet 1: Personnel -->
+    <div class="tab-content" *ngIf="activeTab === 'personal'">
+      <div class="form-grid">
+        <div class="form-section card">
+          <h3>Identité</h3>
+          <div class="form-group">
+            <label>Nom d'affichage</label>
+            <input type="text" formControlName="nomAffichage">
+          </div>
+          <div class="form-group">
+            <label>Genre</label>
+            <select formControlName="genre">
+              <option value="HOMME">Homme</option>
+              <option value="FEMME">Femme</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Date de naissance</label>
+            <input type="date" formControlName="dateNaissance">
+          </div>
+        </div>
+
+        <div class="form-section card">
+          <h3>Localisation & Langue</h3>
+          <div class="form-group">
+            <label>Ville</label>
+            <input type="text" formControlName="ville">
+          </div>
+          <div class="form-group">
+            <label>Pays</label>
+            <input type="text" formControlName="pays">
+          </div>
+          <div class="form-group">
+            <label>Langue préférée</label>
+            <select formControlName="languePreferee">
+              <option value="FR">Français</option>
+              <option value="AR">Arabe (العربية)</option>
+              <option value="EN">Anglais</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglet 2: Réglages -->
+    <div class="tab-content" *ngIf="activeTab === 'settings'">
+      <div class="form-grid">
+        <div class="form-section card" formGroupName="reglagesPriere">
+          <h3>Méthode de Calcul des Prières</h3>
+          <div class="form-group">
+            <label>Méthode</label>
+            <select formControlName="methodeCalcul">
+              <option value="MWL">Muslim World League</option>
+              <option value="ISNA">ISNA (North America)</option>
+              <option value="EGYPT">Egyptian General Authority</option>
+              <option value="MAKKAH">Umm al-Qura (Makkah)</option>
+              <option value="KARACHI">University of Islamic Sciences, Karachi</option>
+              <option value="TEHRAN">Institute of Geophysics, Tehran</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Calcul de l'Asr (Juridique)</label>
+            <select formControlName="asrJuridique">
+              <option value="Standard">Standard (Shafi, Maliki, Hanbali)</option>
+              <option value="Hanafi">Hanafi</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-section card" formGroupName="preferencesNotification">
+          <h3>Notifications</h3>
+          <div class="checkbox-group">
+            <label class="checkbox-item">
+              <input type="checkbox" formControlName="rappelsPriere">
+              Rappels pour les prières
+            </label>
+            <div class="form-group sub-group" *ngIf="profilForm.get('preferencesNotification.rappelsPriere')?.value">
+              <label>Minutes avant la prière</label>
+              <input type="number" formControlName="minutesAvantRappel" min="1" max="60">
+            </div>
+            <label class="checkbox-item">
+              <input type="checkbox" formControlName="versetQuotidien">
+              Verset du jour
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" formControlName="hadithQuotidien">
+              Hadith du jour
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" formControlName="notificationsEvenements">
+              Événements de la communauté
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-save" [disabled]="profilForm.invalid || isSaving">
+        <span *ngIf="!isSaving">Enregistrer les changements</span>
+        <div class="spinner" *ngIf="isSaving"></div>
+      </button>
+    </div>
+  </form>
+</div>
+
+<div class="loading-state" *ngIf="isLoading">
+  <div class="spinner-large"></div>
+  <p>Chargement de votre profil...</p>
+</div>

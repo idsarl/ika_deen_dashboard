@@ -1,5 +1,6 @@
 /* Importation des polices Google Fonts : Amiri pour l'arabe/style islamique, Outfit pour le texte moderne */
 @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import url('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
 
 :root {
   /* Thème par défaut : Normal (Crème Islamique) */
