@@ -8,6 +8,8 @@ import { MosqueeFormComponent } from './components/mosquees/mosquee-form/mosquee
 import { ProfilComponent } from './components/profil/profil';
 import { PublicitesComponent } from './components/publicites/publicites';
 import { RadiosComponent } from './components/radios/radios';
+import { StatsComponent } from './components/stats/stats';
+import { ValidationComponent } from './components/validation/validation';
 import { authGuard } from './guards/auth-guard';
 
 /**
@@ -33,6 +35,8 @@ export const routes: Routes = [
       { path: 'mosquees/edit/:id', component: MosqueeFormComponent },
       { path: 'publicites', component: PublicitesComponent },
       { path: 'radios', component: RadiosComponent },
+      { path: 'stats', component: StatsComponent },
+      { path: 'validation', component: ValidationComponent },
       { path: 'profile', component: ProfilComponent }
     ]
   },

@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../environments/environment.development';
+import { environment } from '../../environments/environment';
 import { Observable } from 'rxjs';
 
 export interface Adresse {
@@ -156,7 +156,7 @@ export class MosqueeService {
   getImamPhotoUrl(path: string | undefined): string {
     if (!path) return '';
     if (path.startsWith('http')) return path;
-    const base = (environment as { apiBaseUrl?: string }).apiBaseUrl ?? '';
+    const base = environment.apiBaseUrl ?? '';
     return `${base}${path}`;
   }
 

@@ -1,0 +1,26 @@
+<div class="validation-page">
+  <header>
+    <h2>Validation des contenus</h2>
+    <p>Modération des mosquées proposées, avis et signalements — en attente d'API backend.</p>
+  </header>
+
+  <section class="placeholder-card card">
+    <div class="placeholder-icon">🛡️</div>
+    <h3>Module prêt côté interface</h3>
+    <p>
+      L'écran est préparé. Dès que le backend expose les routes ci-dessous,
+      on branchera la liste des contenus en attente et les actions Approuver / Refuser.
+    </p>
+
+    <ul class="endpoint-list">
+      <li *ngFor="let ep of requiredEndpoints"><code>{{ ep }}</code></li>
+    </ul>
+
+    <p class="hint">
+      Indiquez aussi le format JSON d'un item (type, auteur, date, payload).
+      Voir <code>PLANNING.md</code> à la racine du projet.
+    </p>
+
+    <a routerLink="/dashboard/stats" class="btn-link">Voir les statistiques disponibles →</a>
+  </section>
+</div>

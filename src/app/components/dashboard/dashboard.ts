@@ -50,7 +50,7 @@ export class DashboardComponent implements OnInit {
     // Applique l'attribut data-theme au body pour le styling CSS global
     document.body.setAttribute('data-theme', theme);
     // Sauvegarde le choix de l'utilisateur
-    localStorage.setItem('theme', theme);
+    localStorage.setItem('ika_theme', theme);
   }
 
   /**

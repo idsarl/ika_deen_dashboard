@@ -43,7 +43,7 @@
         </div>
       </div>
     </div>
-    <button class="upgrade-btn">Stats Mali</button>
+    <a class="upgrade-btn" routerLink="/dashboard/stats">Voir statistiques</a>
   </div>
 </header>
 
@@ -52,18 +52,18 @@
   <div class="grid-item main-activity">
     <div class="card">
       <div class="card-header">
-        <h3>Activités de la Communauté</h3>
-        <span class="more-options">...</span>
+        <h3>Plateforme Ikadeen</h3>
+        <a routerLink="/dashboard/stats" class="more-options">Détails →</a>
       </div>
       <div class="visual-data">
-        <div class="circle circle-1"><span>250<br>Dons</span></div>
-        <div class="circle circle-2"><span>{{ totalUsers }}<br>Users</span></div>
-        <div class="circle circle-3"><span>{{ totalMosquees }}<br>Mosquées</span></div>
+        <div class="circle circle-2"><span>{{ platformStats?.totalUsers ?? totalUsers }}<br>Users</span></div>
+        <div class="circle circle-3"><span>{{ platformStats?.totalMosquees ?? totalMosquees }}<br>Mosquées</span></div>
+        <div class="circle circle-1"><span>{{ platformStats?.totalPublicites ?? '—' }}<br>Pubs</span></div>
+        <div class="circle circle-4"><span>{{ platformStats?.totalRadios ?? '—' }}<br>Radios</span></div>
       </div>
       <div class="legend">
-        <div class="legend-item"><span class="dot yellow"></span> Inscriptions</div>
-        <div class="legend-item"><span class="dot green"></span> Prières</div>
-        <div class="legend-item"><span class="dot brown"></span> Dons</div>
+        <div class="legend-item"><span class="dot green"></span> Utilisateurs actifs : {{ platformStats?.activeUsers ?? '—' }}</div>
+        <div class="legend-item"><span class="dot yellow"></span> Admins : {{ platformStats?.adminUsers ?? '—' }}</div>
       </div>
     </div>
   </div>
@@ -98,25 +98,6 @@
         <p>Prochaine : {{ nextPrayerName }} (dans {{ remainingTime }})</p>
         <div class="progress-bar">
           <div class="progress" [style.width.%]="progress"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Social Impact (Progress bar style) -->
-  <div class="grid-item impact-widget">
-    <div class="card">
-      <div class="card-header">
-        <h4>Objectif Forage Kayes</h4>
-        <span class="badge success">68%</span>
-      </div>
-      <div class="progress-stat">
-        <div class="linear-progress-bar">
-          <div class="progress-fill" style="width: 68%"></div>
-        </div>
-        <div class="progress-labels">
-          <span>1.2M CFA collectés</span>
-          <span>Objectif: 2M</span>
         </div>
       </div>
     </div>
@@ -171,28 +152,18 @@
     </div>
   </div>
 
-  <!-- Feedback/Comments -->
+  <!-- Accès rapide admin -->
   <div class="grid-item feedback-widget">
     <div class="card">
       <div class="card-header">
-        <h3>Retours Utilisateurs</h3>
-        <span class="count">4 nouveaux</span>
+        <h3>Accès rapide</h3>
       </div>
-      <div class="feedback-list">
-        <div class="feedback-item">
-          <div class="f-avatar">A</div>
-          <div class="f-info">
-            <p class="f-user">Amadou D.</p>
-            <p class="f-text">"L'app est géniale pour les horaires."</p>
-          </div>
-        </div>
-        <div class="feedback-item">
-          <div class="f-avatar">S</div>
-          <div class="f-info">
-            <p class="f-user">Salif K.</p>
-            <p class="f-text">"Besoin de plus de radios à Gao."</p>
-          </div>
-        </div>
+      <div class="quick-links">
+        <a routerLink="/dashboard/mosquees" class="quick-link">🕌 Mosquées</a>
+        <a routerLink="/dashboard/users" class="quick-link">👤 Utilisateurs</a>
+        <a routerLink="/dashboard/publicites" class="quick-link">📢 Publicités</a>
+        <a routerLink="/dashboard/radios" class="quick-link">📻 Radios</a>
+        <a routerLink="/dashboard/validation" class="quick-link">🛡️ Validation</a>
       </div>
     </div>
   </div>

@@ -1,0 +1,59 @@
+<div class="stats-page">
+  <header class="stats-header">
+    <div>
+      <h2>Statistiques plateforme</h2>
+      <p>Données agrégées en temps réel depuis l'API (users, mosquées, publicités, radios).</p>
+    </div>
+    <button class="refresh-btn" (click)="loadStats()" [disabled]="isLoading">Actualiser</button>
+  </header>
+
+  <div class="error-banner" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Chargement...</p>
+  </div>
+
+  <ng-container *ngIf="!isLoading && stats">
+    <div class="kpi-grid">
+      <article class="kpi-card">
+        <span class="kpi-label">Utilisateurs</span>
+        <strong class="kpi-value">{{ stats.totalUsers }}</strong>
+        <span class="kpi-sub">{{ stats.activeUsers }} actifs · {{ stats.inactiveUsers }} inactifs</span>
+      </article>
+      <article class="kpi-card">
+        <span class="kpi-label">Mosquées</span>
+        <strong class="kpi-value">{{ stats.totalMosquees }}</strong>
+        <a routerLink="/dashboard/mosquees" class="kpi-link">Gérer →</a>
+      </article>
+      <article class="kpi-card">
+        <span class="kpi-label">Publicités actives</span>
+        <strong class="kpi-value">{{ stats.totalPublicites }}</strong>
+        <a routerLink="/dashboard/publicites" class="kpi-link">Gérer →</a>
+      </article>
+      <article class="kpi-card">
+        <span class="kpi-label">Radios</span>
+        <strong class="kpi-value">{{ stats.totalRadios }}</strong>
+        <a routerLink="/dashboard/radios" class="kpi-link">Gérer →</a>
+      </article>
+    </div>
+
+    <section class="detail-card card">
+      <h3>Répartition utilisateurs</h3>
+      <div class="bar-row">
+        <span>Comptes actifs</span>
+        <div class="bar-track"><div class="bar-fill green" [style.width.%]="activeUserRate"></div></div>
+        <span>{{ activeUserRate }}%</span>
+      </div>
+      <div class="meta-row">
+        <span>Administrateurs : <strong>{{ stats.adminUsers }}</strong></span>
+        <span>Utilisateurs standards : <strong>{{ stats.totalUsers - stats.adminUsers }}</strong></span>
+      </div>
+    </section>
+
+    <p class="api-note">
+      Pour des graphiques (inscriptions par mois, événements, etc.), exposez
+      <code>GET /api/v1/admin/stats</code> côté backend — le front pourra s'y brancher.
+    </p>
+  </ng-container>
+</div>

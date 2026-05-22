@@ -6,6 +6,7 @@ import { PriereService, HorairesPriereResponse } from '../../services/priere';
 import { ProfilService, Profil } from '../../services/profil';
 import { UserService, User } from '../../services/user';
 import { MosqueeService, Mosquee } from '../../services/mosquee';
+import { AdminStatsService, PlatformStats } from '../../services/admin-stats';
 
 @Component({
   selector: 'app-overview',
@@ -20,8 +21,10 @@ export class OverviewComponent implements OnInit {
   private profilService = inject(ProfilService);
   private userService = inject(UserService);
   private mosqueeService = inject(MosqueeService);
+  private adminStatsService = inject(AdminStatsService);
   
   user: any;
+  platformStats: PlatformStats | null = null;
   profil: Profil | null = null;
   horaires: HorairesPriereResponse | null = null;
   
@@ -52,18 +55,28 @@ export class OverviewComponent implements OnInit {
   }
 
   loadSystemStats(): void {
-    // Récupération des utilisateurs pour les stats et la recherche
-    this.userService.getUsers().subscribe(users => {
-      this.totalUsers = users.length;
-      this.allUsers = users;
+    this.adminStatsService.getPlatformStats().subscribe({
+      next: (stats) => {
+        this.platformStats = stats;
+        this.totalUsers = stats.totalUsers;
+        this.totalMosquees = stats.totalMosquees;
+      }
     });
 
-    // Récupération des mosquées pour les stats and la recherche
-    this.mosqueeService.getAll().subscribe(mosquees => {
-      this.totalMosquees = mosquees.length;
+    this.userService.getUsers().subscribe((users) => {
+      this.allUsers = users;
+      if (!this.platformStats) {
+        this.totalUsers = users.length;
+      }
+    });
+
+    this.mosqueeService.getAll().subscribe((mosquees) => {
       this.allMosquees = mosquees;
       this.recentMosquees = mosquees.slice(-2).reverse();
       this.filteredMosquees = [...this.recentMosquees];
+      if (!this.platformStats) {
+        this.totalMosquees = mosquees.length;
+      }
     });
   }
 
