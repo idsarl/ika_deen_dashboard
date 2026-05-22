@@ -1,0 +1,80 @@
+<div class="media-container">
+  <div class="page-header">
+    <div class="header-info">
+      <h2>Radios islamiques</h2>
+      <p>Gérez les flux audio disponibles dans l'application.</p>
+    </div>
+    <div class="header-actions">
+      <button class="refresh-btn" (click)="loadRadios()" [disabled]="isLoading" title="Actualiser">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18">
+          <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+        </svg>
+      </button>
+      <button class="add-btn" (click)="toggleForm()">
+        {{ showForm ? 'Annuler' : '+ Nouvelle radio' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="error-banner" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <section class="form-card card" *ngIf="showForm">
+    <h3>Ajouter une radio</h3>
+    <form [formGroup]="radioForm" (ngSubmit)="onSubmit()" class="media-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nom de la radio *</label>
+          <input type="text" formControlName="nom" placeholder="Ex: Radio Bamako">
+        </div>
+        <div class="form-group">
+          <label>URL du flux (stream) *</label>
+          <input type="url" formControlName="urlStream" placeholder="https://stream.example.com/live">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Logo (optionnel)</label>
+        <div class="logo-upload-row">
+          <div class="logo-preview" (click)="logoInput.click()">
+            <img *ngIf="logoPreviewUrl" [src]="logoPreviewUrl" alt="Logo">
+            <span *ngIf="!logoPreviewUrl">+</span>
+          </div>
+          <div>
+            <input type="file" #logoInput (change)="onLogoSelected($event)" accept="image/*" hidden>
+            <button type="button" class="btn-secondary" (click)="logoInput.click()">Choisir un logo</button>
+            <button type="button" class="btn-text-danger" *ngIf="logoPreviewUrl" (click)="removeLogo()">Supprimer</button>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit" [disabled]="isSaving || radioForm.invalid">
+        {{ isSaving ? 'Enregistrement...' : 'Ajouter la radio' }}
+      </button>
+    </form>
+  </section>
+
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Chargement des radios...</p>
+  </div>
+
+  <div class="media-grid" *ngIf="!isLoading">
+    <article class="media-card" *ngFor="let radio of radios">
+      <div class="media-visual radio-logo">
+        <img *ngIf="radio.logoUrl" [src]="getLogoUrl(radio.logoUrl)" [alt]="radio.nom">
+        <div class="media-placeholder" *ngIf="!radio.logoUrl">📻</div>
+      </div>
+      <div class="media-body">
+        <h3>{{ radio.nom }}</h3>
+        <p class="stream-url" [title]="radio.urlStream">{{ radio.urlStream }}</p>
+        <button class="btn-delete" (click)="onDelete(radio.id!)">Supprimer</button>
+      </div>
+    </article>
+  </div>
+
+  <div class="empty-state" *ngIf="!isLoading && radios.length === 0">
+    <div class="empty-icon">📻</div>
+    <h3>Aucune radio</h3>
+    <p>Ajoutez un flux pour le proposer aux utilisateurs.</p>
+  </div>
+</div>

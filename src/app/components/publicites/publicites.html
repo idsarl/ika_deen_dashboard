@@ -1,0 +1,89 @@
+<div class="media-container">
+  <div class="page-header">
+    <div class="header-info">
+      <h2>Publicités</h2>
+      <p>Gérez les bannières publicitaires affichées dans l'application mobile.</p>
+    </div>
+    <div class="header-actions">
+      <button class="refresh-btn" (click)="loadPublicites()" [disabled]="isLoading" title="Actualiser">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18">
+          <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+        </svg>
+      </button>
+      <button class="add-btn" (click)="toggleForm()">
+        {{ showForm ? 'Annuler' : '+ Nouvelle bannière' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="error-banner" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <section class="form-card card" *ngIf="showForm">
+    <h3>Nouvelle bannière publicitaire</h3>
+    <form [formGroup]="publiciteForm" (ngSubmit)="onSubmit()" class="media-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Lien de destination (optionnel)</label>
+          <input type="url" formControlName="lienDestination" placeholder="https://...">
+        </div>
+        <div class="form-group">
+          <label>Date de fin (optionnel)</label>
+          <input type="datetime-local" formControlName="dateFin">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Image de la bannière *</label>
+        <div class="upload-zone" (click)="imageInput.click()">
+          <input type="file" #imageInput (change)="onImageSelected($event)" accept="image/*" hidden>
+          <div class="upload-placeholder" *ngIf="!imagePreviewUrl">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="36">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+            <p>Cliquez pour choisir l'image</p>
+          </div>
+          <img *ngIf="imagePreviewUrl" [src]="imagePreviewUrl" alt="Aperçu" class="upload-preview">
+        </div>
+        <button type="button" class="btn-text-danger" *ngIf="imagePreviewUrl" (click)="removeImage()">Supprimer l'image</button>
+      </div>
+
+      <button type="submit" class="btn-submit" [disabled]="isSaving || !selectedImage">
+        {{ isSaving ? 'Publication...' : 'Publier la bannière' }}
+      </button>
+    </form>
+  </section>
+
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Chargement des publicités...</p>
+  </div>
+
+  <div class="media-grid" *ngIf="!isLoading">
+    <article class="media-card" *ngFor="let pub of publicites">
+      <div class="media-visual banner">
+        <img *ngIf="pub.imageUrl" [src]="getImageUrl(pub.imageUrl)" [alt]="'Bannière ' + pub.id">
+        <div class="media-placeholder" *ngIf="!pub.imageUrl">Sans image</div>
+        <span class="status-badge active">Active</span>
+      </div>
+      <div class="media-body">
+        <p class="media-link" *ngIf="pub.lienDestination">
+          <span class="label">Lien</span>
+          <a [href]="pub.lienDestination" target="_blank" rel="noopener">{{ pub.lienDestination }}</a>
+        </p>
+        <p class="media-meta" *ngIf="pub.dateFin">
+          <span class="label">Fin</span> {{ pub.dateFin }}
+        </p>
+        <p class="media-meta muted" *ngIf="!pub.lienDestination && !pub.dateFin">Aucun lien ni date de fin</p>
+        <button class="btn-delete" (click)="onDelete(pub.id!)">Supprimer</button>
+      </div>
+    </article>
+  </div>
+
+  <div class="empty-state" *ngIf="!isLoading && publicites.length === 0">
+    <div class="empty-icon">📢</div>
+    <h3>Aucune publicité active</h3>
+    <p>Créez une bannière pour la diffuser dans l'application.</p>
+  </div>
+</div>

@@ -2,7 +2,8 @@ import { Component, OnInit, AfterViewInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { MosqueeService, MosqueeRequest } from '../../../services/mosquee';
+import { MosqueeService, MosqueeRequest, Mosquee } from '../../../services/mosquee';
+import { FileUploadService } from '../../../services/file-upload';
 import * as L from 'leaflet';
 
 @Component({
@@ -15,6 +16,7 @@ import * as L from 'leaflet';
 export class MosqueeFormComponent implements OnInit, AfterViewInit {
   private fb = inject(FormBuilder);
   private mosqueeService = inject(MosqueeService);
+  private fileUploadService = inject(FileUploadService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
@@ -22,7 +24,17 @@ export class MosqueeFormComponent implements OnInit, AfterViewInit {
   isEditMode = false;
   mosqueeId: string | null = null;
   isLoading = false;
-  
+
+  // Upload image de couverture de la mosquée
+  selectedCoverFile: File | null = null;
+  coverPreviewUrl: string | null = null;
+  existingCoverUrl: string | null = null;
+
+  // Upload photo de l'Imam
+  selectedImamFile: File | null = null;
+  imamPreviewUrl: string | null = null;
+  existingImamUrl: string | null = null;
+
   private map!: L.Map;
   private marker!: L.Marker;
 
@@ -52,7 +64,7 @@ export class MosqueeFormComponent implements OnInit, AfterViewInit {
         fr: [''],
         ar: ['']
       }),
-      latitude: [12.6392, Validators.required], // Défaut: Bamako
+      latitude: [12.6392, Validators.required],
       longitude: [-8.0029, Validators.required],
       adresse: this.fb.group({
         rue: [''],
@@ -79,8 +91,7 @@ export class MosqueeFormComponent implements OnInit, AfterViewInit {
       }),
       imam: this.fb.group({
         nom: [''],
-        bio: [''],
-        photoUrl: ['']
+        bio: ['']
       })
     });
   }
@@ -90,13 +101,11 @@ export class MosqueeFormComponent implements OnInit, AfterViewInit {
     const lng = this.mosqueeForm.get('longitude')?.value || -8.0029;
 
     this.map = L.map('map').setView([lat, lng], 13);
-
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(this.map);
 
     this.marker = L.marker([lat, lng], { draggable: true }).addTo(this.map);
-
     this.marker.on('dragend', () => {
       const position = this.marker.getLatLng();
       this.updateCoords(position.lat, position.lng);
@@ -110,10 +119,7 @@ export class MosqueeFormComponent implements OnInit, AfterViewInit {
   }
 
   private updateCoords(lat: number, lng: number): void {
-    this.mosqueeForm.patchValue({
-      latitude: lat,
-      longitude: lng
-    });
+    this.mosqueeForm.patchValue({ latitude: lat, longitude: lng });
   }
 
   private loadMosqueeData(id: string): void {
@@ -129,8 +135,13 @@ export class MosqueeFormComponent implements OnInit, AfterViewInit {
           contact: mosquee.contact,
           equipements: mosquee.equipements,
           horairesPriere: mosquee.horairesPriere,
-          imam: mosquee.imam
+          imam: { nom: mosquee.imam?.nom, bio: mosquee.imam?.bio }
         });
+
+        if (mosquee.imam?.photoUrl) {
+          this.existingImamUrl = mosquee.imam.photoUrl;
+          this.imamPreviewUrl = this.mosqueeService.getImamPhotoUrl(mosquee.imam.photoUrl);
+        }
 
         const newPos = L.latLng(mosquee.location.coordinates[1], mosquee.location.coordinates[0]);
         this.marker.setLatLng(newPos);
@@ -144,19 +155,81 @@ export class MosqueeFormComponent implements OnInit, AfterViewInit {
     });
   }
 
+  // --- Image de couverture de la mosquée ---
+  onCoverSelected(event: any): void {
+    const file = event.target.files[0];
+    if (!file) return;
+    this.selectedCoverFile = file;
+    const reader = new FileReader();
+    reader.onload = () => this.coverPreviewUrl = reader.result as string;
+    reader.readAsDataURL(file);
+  }
+
+  removeCover(): void {
+    this.selectedCoverFile = null;
+    this.coverPreviewUrl = null;
+    this.existingCoverUrl = null;
+  }
+
+  // --- Photo de l'Imam ---
+  onImamPhotoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    this.selectedImamFile = file;
+    const reader = new FileReader();
+    reader.onload = () => this.imamPreviewUrl = reader.result as string;
+    reader.readAsDataURL(file);
+  }
+
+  removeImamPhoto(): void {
+    this.selectedImamFile = null;
+    this.imamPreviewUrl = null;
+    this.existingImamUrl = null;
+  }
+
+  // --- Soumission ---
   onSubmit(): void {
     if (this.mosqueeForm.invalid) return;
-
     this.isLoading = true;
-    const request: MosqueeRequest = this.mosqueeForm.value;
 
-    const action = this.isEditMode 
-      ? this.mosqueeService.update(this.mosqueeId!, request)
-      : this.mosqueeService.create(request);
+    const payload: MosqueeRequest = this.mosqueeForm.value as MosqueeRequest;
+
+    const action = this.isEditMode
+      ? this.mosqueeService.update(this.mosqueeId!, payload)
+      : this.mosqueeService.createMosquee(
+          payload,
+          this.selectedImamFile ?? undefined
+        );
 
     action.subscribe({
-      next: () => {
-        this.router.navigate(['/dashboard/mosquees']);
+      next: (savedMosquee: Mosquee) => {
+        const uploads: Promise<void>[] = [];
+
+        if (this.selectedCoverFile && savedMosquee.id) {
+          uploads.push(
+            new Promise<void>((resolve) => {
+              this.fileUploadService
+                .uploadMosqueeImage(savedMosquee.id!, this.selectedCoverFile!, true)
+                .subscribe({ next: () => resolve(), error: () => resolve() });
+            })
+          );
+        }
+
+        // En édition uniquement : photo imam via POST /mosquees/{id}/images
+        if (this.isEditMode && this.selectedImamFile && savedMosquee.id) {
+          uploads.push(
+            new Promise<void>((resolve) => {
+              this.fileUploadService
+                .uploadMosqueeImage(savedMosquee.id!, this.selectedImamFile!, false)
+                .subscribe({ next: () => resolve(), error: () => resolve() });
+            })
+          );
+        }
+
+        Promise.all(uploads).then(() => {
+          this.router.navigate(['/dashboard/mosquees']);
+        });
       },
       error: (err) => {
         console.error(err);

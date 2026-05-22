@@ -6,6 +6,13 @@ import { HttpInterceptorFn } from '@angular/common/http';
  * si un token est présent dans le localStorage.
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  // Si la requête concerne l'authentification (connexion, inscription),
+  // on ne doit pas joindre de token d'accès afin d'éviter les erreurs 403 (Forbidden)
+  // en cas de présence d'un ancien token expiré dans le localStorage.
+  if (req.url.includes('/auth/login') || req.url.includes('/auth/register')) {
+    return next(req);
+  }
+
   const token = localStorage.getItem('ika_token');
 
   // Si un token existe, on clone la requête pour y ajouter le header

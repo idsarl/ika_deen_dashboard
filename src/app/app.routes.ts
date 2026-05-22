@@ -6,6 +6,8 @@ import { UsersComponent } from './components/users/users';
 import { MosqueesComponent } from './components/mosquees/mosquees';
 import { MosqueeFormComponent } from './components/mosquees/mosquee-form/mosquee-form';
 import { ProfilComponent } from './components/profil/profil';
+import { PublicitesComponent } from './components/publicites/publicites';
+import { RadiosComponent } from './components/radios/radios';
 import { authGuard } from './guards/auth-guard';
 
 /**
@@ -29,6 +31,8 @@ export const routes: Routes = [
       { path: 'mosquees', component: MosqueesComponent },
       { path: 'mosquees/new', component: MosqueeFormComponent },
       { path: 'mosquees/edit/:id', component: MosqueeFormComponent },
+      { path: 'publicites', component: PublicitesComponent },
+      { path: 'radios', component: RadiosComponent },
       { path: 'profile', component: ProfilComponent }
     ]
   },
