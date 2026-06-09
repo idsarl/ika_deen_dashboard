@@ -46,12 +46,12 @@
           </td>
           <td>{{ user.telephone || 'N/A' }}</td>
           <td>
-            <span class="badge" [class.badge-admin]="user.role === 'ADMIN'">
+            <span class="badge" [class.badge-admin]="user.role === 'SUPER_ADMIN' ">
               {{ user.role }}
             </span>
           </td>
           <td>
-            <div class="status-toggle" [class.disabled]="user.role === 'ADMIN'" (click)="toggleStatus(user)">
+            <div class="status-toggle" [class.disabled]="user.role === 'SUPER_ADMIN'" (click)="toggleStatus(user)">
               <div class="toggle-track" [class.active]="user.estActif">
                 <div class="toggle-thumb"></div>
               </div>
@@ -69,8 +69,8 @@
               <button 
                 class="btn-delete" 
                 (click)="onDeleteUser(user.id)" 
-                [disabled]="user.role === 'ADMIN'"
-                [title]="user.role === 'ADMIN' ? 'Impossible de supprimer un administrateur' : 'Supprimer'"
+                [disabled]="user.role === 'SUPER_ADMIN'"
+                [title]="user.role === 'SUPER_ADMIN' ? 'Impossible de supprimer un super administrateur' : 'Supprimer'"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18">
                   <polyline points="3 6 5 6 21 6"></polyline>
@@ -102,7 +102,7 @@
           <div class="avatar-large">{{ selectedUser.email.charAt(0).toUpperCase() }}</div>
           <div class="user-main-info">
             <h4>{{ selectedUser.email }}</h4>
-            <span class="badge" [class.badge-admin]="selectedUser.role === 'ADMIN'">{{ selectedUser.role }}</span>
+            <span class="badge" [class.badge-admin]="selectedUser.role === 'SUPER_ADMIN'">{{ selectedUser.role }}</span>
           </div>
         </div>
         

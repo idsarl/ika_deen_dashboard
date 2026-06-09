@@ -10,7 +10,7 @@ export interface User {
   id: string;
   email: string;
   telephone?: string;
-  role: 'ADMIN' | 'UTILISATEUR';
+  role: 'ADMIN' | 'UTILISATEUR' | 'SUPER_ADMIN';
   estActif: boolean;
   estVerifie: boolean;
 }

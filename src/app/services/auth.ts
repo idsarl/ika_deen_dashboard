@@ -36,13 +36,13 @@ export class AuthService {
       .pipe(
         tap(response => {
           // Vérification si le token est présent et si l'utilisateur possède le rôle ADMIN
-          if (response.token && response.role === 'ADMIN') {
+          if (response.token && response.role === 'ADMIN' || response.role === 'SUPER_ADMIN') {
             // Stockage du token JWT dans le localStorage pour maintenir la session
             localStorage.setItem('ika_token', response.token);
             // Stockage des informations utilisateur de base
             localStorage.setItem('ika_user', JSON.stringify({ email: response.email, role: response.role }));
-          } else if (response.role !== 'ADMIN') {
-            // Si l'utilisateur n'est pas ADMIN, on lève une erreur d'accès refusé
+          } else if (response.role !== 'ADMIN' && response.role !== 'SUPER_ADMIN') {
+            // Si l'utilisateur n'est pas ADMIN ni SUPER_ADMIN, on lève une erreur d'accès refusé
             throw new Error('ACCESS_DENIED');
           }
         })

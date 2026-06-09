@@ -49,10 +49,10 @@ export class UsersComponent implements OnInit {
 
   /**
    * Bascule le statut d'un utilisateur (Actif / Inactif).
-   * Uniquement pour les utilisateurs qui ne sont pas ADMIN.
+   * Uniquement pour les utilisateurs qui ne sont pas SUPER_ADMIN.
    */
   toggleStatus(user: User): void {
-    if (user.role === 'ADMIN') return;
+    if (user.role === 'SUPER_ADMIN') return;
 
     const newStatus = !user.estActif;
     this.userService.updateStatus(user.id, newStatus).subscribe({
