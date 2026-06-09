@@ -5,6 +5,8 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MosqueeService, MosqueeRequest, Mosquee } from '../../../services/mosquee';
 import { FileUploadService } from '../../../services/file-upload';
 import * as L from 'leaflet';
+import { Utilisateur, UtilisateurService } from '../../../services/UtilisateurService';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-mosquee-form',
@@ -38,6 +40,9 @@ export class MosqueeFormComponent implements OnInit, AfterViewInit {
   private map!: L.Map;
   private marker!: L.Marker;
 
+  private utilisateurService = inject(UtilisateurService);
+  admins: Utilisateur[] = [];
+
   constructor() {
     this.initForm();
   }
@@ -48,7 +53,14 @@ export class MosqueeFormComponent implements OnInit, AfterViewInit {
       this.isEditMode = true;
       this.loadMosqueeData(this.mosqueeId);
     }
+    this.loadAdmins();
   }
+
+  loadAdmins(): void {
+  this.utilisateurService.getAdmins().subscribe(data => {
+    this.admins = data;
+  });
+}
 
   ngAfterViewInit(): void {
     this.initMap();
@@ -92,7 +104,12 @@ export class MosqueeFormComponent implements OnInit, AfterViewInit {
       imam: this.fb.group({
         nom: [''],
         bio: ['']
-      })
+      }),
+      admin: this.fb.group({
+      email: [''],
+      motDePasse: [''],
+      telephone: ['']
+    })
     });
   }
 
@@ -190,52 +207,47 @@ export class MosqueeFormComponent implements OnInit, AfterViewInit {
 
   // --- Soumission ---
   onSubmit(): void {
-    if (this.mosqueeForm.invalid) return;
-    this.isLoading = true;
+  if (this.mosqueeForm.invalid) return;
+  this.isLoading = true;
 
-    const payload: MosqueeRequest = this.mosqueeForm.value as MosqueeRequest;
+  const payload: MosqueeRequest = this.mosqueeForm.value;
 
-    const action = this.isEditMode
-      ? this.mosqueeService.update(this.mosqueeId!, payload)
-      : this.mosqueeService.createMosquee(
-          payload,
-          this.selectedImamFile ?? undefined
-        );
-
-    action.subscribe({
-      next: (savedMosquee: Mosquee) => {
-        const uploads: Promise<void>[] = [];
-
-        if (this.selectedCoverFile && savedMosquee.id) {
-          uploads.push(
-            new Promise<void>((resolve) => {
-              this.fileUploadService
-                .uploadMosqueeImage(savedMosquee.id!, this.selectedCoverFile!, true)
-                .subscribe({ next: () => resolve(), error: () => resolve() });
-            })
-          );
-        }
-
-        // En édition uniquement : photo imam via POST /mosquees/{id}/images
-        if (this.isEditMode && this.selectedImamFile && savedMosquee.id) {
-          uploads.push(
-            new Promise<void>((resolve) => {
-              this.fileUploadService
-                .uploadMosqueeImage(savedMosquee.id!, this.selectedImamFile!, false)
-                .subscribe({ next: () => resolve(), error: () => resolve() });
-            })
-          );
-        }
-
-        Promise.all(uploads).then(() => {
-          this.router.navigate(['/dashboard/mosquees']);
-        });
-      },
-      error: (err) => {
-        console.error(err);
-        this.isLoading = false;
-        alert('Une erreur est survenue lors de l\'enregistrement.');
-      }
+  if (this.isEditMode) {
+    // Mode Édition : PUT (JSON uniquement)
+    this.mosqueeService.update(this.mosqueeId!, payload).subscribe({
+      next: (savedMosquee) => this.handleUploadsAndRedirect(savedMosquee.id!),
+      error: (err) => this.handleError(err)
+    });
+  } else {
+    // Mode Création : POST Multipart (JSON + Imam Photo)
+    this.mosqueeService.createMosquee(payload, this.selectedImamFile ?? undefined).subscribe({
+      next: (savedMosquee) => this.handleUploadsAndRedirect(savedMosquee.id!),
+      error: (err) => this.handleError(err)
     });
   }
+}
+
+private handleUploadsAndRedirect(mosqueeId: string): void {
+  const uploads: Observable<any>[] = [];
+
+  // Si on a une couverture, on l'upload via le service spécifique
+  if (this.selectedCoverFile) {
+    uploads.push(this.fileUploadService.uploadMosqueeImage(mosqueeId, this.selectedCoverFile, true));
+  }
+
+  if (uploads.length > 0) {
+    // On attend que les uploads finissent avant de rediriger
+    import('rxjs').then(({ forkJoin }) => {
+      forkJoin(uploads).subscribe(() => this.router.navigate(['/dashboard/mosquees']));
+    });
+  } else {
+    this.router.navigate(['/dashboard/mosquees']);
+  }
+}
+
+private handleError(err: any): void {
+  console.error(err);
+  this.isLoading = false;
+  alert('Erreur lors de l\'enregistrement : ' + (err.error?.message || 'Vérifiez les données'));
+}
 }

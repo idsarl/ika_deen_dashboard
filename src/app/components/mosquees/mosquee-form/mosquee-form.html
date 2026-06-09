@@ -10,39 +10,32 @@
   <form [formGroup]="mosqueeForm" (ngSubmit)="onSubmit()" class="premium-form">
     
     <div class="form-grid">
-      <!-- Section 1: Informations de base -->
       <section class="form-section card">
         <div class="section-title">
           <span class="icon">📝</span>
           <h3>Informations Générales</h3>
         </div>
-        
         <div class="form-group" formGroupName="nom">
           <label>Nom de la mosquée (FR) *</label>
           <input type="text" formControlName="fr" placeholder="Ex: Grande Mosquée de Bamako">
         </div>
-
         <div class="form-group" formGroupName="nom">
           <label>Nom de la mosquée (AR)</label>
           <input type="text" formControlName="ar" dir="rtl" class="arabic-input" placeholder="المسجد الكبير">
         </div>
-
         <div class="form-group" formGroupName="description">
           <label>Description (FR)</label>
           <textarea formControlName="fr" rows="3"></textarea>
         </div>
       </section>
 
-      <!-- Section 2: Localisation & Carte -->
       <section class="form-section card">
         <div class="section-title">
           <span class="icon">📍</span>
           <h3>Localisation GPS</h3>
         </div>
-        
-        <p class="instruction">Cliquez sur la carte ou déplacez le marqueur pour définir la position exacte.</p>
+        <p class="instruction">Cliquez sur la carte ou déplacez le marqueur.</p>
         <div id="map" class="map-container"></div>
-        
         <div class="coords-row">
           <div class="form-group">
             <label>Latitude</label>
@@ -53,24 +46,13 @@
             <input type="number" formControlName="longitude" step="any" readonly>
           </div>
         </div>
-
         <div formGroupName="adresse" class="address-grid">
-          <div class="form-group full">
-            <label>Rue / Quartier</label>
-            <input type="text" formControlName="rue">
-          </div>
-          <div class="form-group">
-            <label>Ville *</label>
-            <input type="text" formControlName="ville">
-          </div>
-          <div class="form-group">
-            <label>Pays *</label>
-            <input type="text" formControlName="pays">
-          </div>
+          <div class="form-group full"><label>Rue / Quartier</label><input type="text" formControlName="rue"></div>
+          <div class="form-group"><label>Ville *</label><input type="text" formControlName="ville"></div>
+          <div class="form-group"><label>Pays *</label><input type="text" formControlName="pays"></div>
         </div>
       </section>
 
-      <!-- Section 3: Horaires de Prière -->
       <section class="form-section card">
         <div class="section-title">
           <span class="icon">🕌</span>
@@ -86,107 +68,82 @@
         </div>
       </section>
 
-      <!-- Section 4: Équipements & Contact -->
       <section class="form-section card">
         <div class="section-title">
           <span class="icon">✨</span>
           <h3>Services & Contact</h3>
         </div>
-        
         <div formGroupName="equipements" class="checkbox-group">
-          <label class="checkbox-item">
-            <input type="checkbox" formControlName="parking">
-            Parking disponible
-          </label>
-          <label class="checkbox-item">
-            <input type="checkbox" formControlName="sectionFemmes">
-            Section Femmes
-          </label>
-          <label class="checkbox-item">
-            <input type="checkbox" formControlName="accesHandicapes">
-            Accès Handicapés
-          </label>
+          <label class="checkbox-item"><input type="checkbox" formControlName="parking"> Parking</label>
+          <label class="checkbox-item"><input type="checkbox" formControlName="sectionFemmes"> Section Femmes</label>
+          <label class="checkbox-item"><input type="checkbox" formControlName="accesHandicapes"> Accès Handicapés</label>
         </div>
-
         <div formGroupName="contact" class="contact-grid">
+          <div class="form-group"><label>Téléphone</label><input type="text" formControlName="telephone"></div>
+          <div class="form-group"><label>Email</label><input type="email" formControlName="email"></div>
+        </div>
+      </section>
+
+      <section class="form-section card">
+        <div class="section-title">
+          <span class="icon">🛡️</span>
+          <h3>Gestion de l'Administrateur</h3>
+        </div>
+        <div formGroupName="admin" class="admin-grid">
+          <div class="form-group">
+            <label>Administrateur existant *</label>
+            <select formControlName="email" class="form-control">
+              <option value="">-- Choisir un administrateur --</option>
+              <option *ngFor="let admin of admins" [value]="admin.email">
+                {{ admin.email }}
+              </option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Mot de passe (si nouvel utilisateur)</label>
+            <input type="password" formControlName="motDePasse" placeholder="••••••••">
+          </div>
           <div class="form-group">
             <label>Téléphone</label>
             <input type="text" formControlName="telephone">
           </div>
-          <div class="form-group">
-            <label>Email</label>
-            <input type="email" formControlName="email">
-          </div>
         </div>
       </section>
 
-      <!-- Section 5: Photo de Couverture de la Mosquée -->
       <section class="form-section card full-width">
-        <div class="section-title">
-          <span class="icon">🖼️</span>
-          <h3>Photo de Couverture</h3>
-        </div>
+        <div class="section-title"><span class="icon">🖼️</span><h3>Photo de Couverture</h3></div>
         <div class="upload-zone" (click)="coverInput.click()">
           <input type="file" #coverInput (change)="onCoverSelected($event)" accept="image/*" style="display:none">
           <div class="upload-placeholder" *ngIf="!coverPreviewUrl">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
             <p>Cliquez pour choisir une photo de la mosquée</p>
-            <span>JPG, PNG — Max 10 Mo</span>
           </div>
           <div class="upload-preview-large" *ngIf="coverPreviewUrl">
             <img [src]="coverPreviewUrl" alt="Aperçu couverture">
-            <div class="upload-overlay">
-              <span>Changer la photo</span>
-            </div>
           </div>
         </div>
-        <button type="button" class="btn-remove-img" *ngIf="coverPreviewUrl" (click)="removeCover(); $event.stopPropagation()">
-          ✕ Supprimer la photo
-        </button>
+        <button type="button" class="btn-remove-img" *ngIf="coverPreviewUrl" (click)="removeCover(); $event.stopPropagation()">✕ Supprimer</button>
       </section>
 
-      <!-- Section 6: Imam -->
       <section class="form-section card full-width">
-        <div class="section-title">
-          <span class="icon">👤</span>
-          <h3>Informations sur l'Imam</h3>
-        </div>
+        <div class="section-title"><span class="icon">👤</span><h3>Informations sur l'Imam</h3></div>
         <div formGroupName="imam" class="imam-grid">
-          <div class="form-group">
-            <label>Nom de l'Imam</label>
-            <input type="text" formControlName="nom">
-          </div>
-          <div class="form-group">
-            <label>Bio courte</label>
-            <textarea formControlName="bio" rows="2"></textarea>
-          </div>
-          <!-- Remplacement du champ texte par un vrai upload d'image -->
+          <div class="form-group"><label>Nom de l'Imam</label><input type="text" formControlName="nom"></div>
+          <div class="form-group"><label>Bio courte</label><textarea formControlName="bio" rows="2"></textarea></div>
           <div class="form-group imam-photo-upload">
             <label>Photo de l'Imam</label>
             <div class="imam-upload-row">
-              <!-- Prévisualisation -->
               <div class="imam-preview-circle" (click)="imamInput.click()">
                 <img *ngIf="imamPreviewUrl" [src]="imamPreviewUrl" alt="Photo Imam">
-                <div class="imam-upload-icon" *ngIf="!imamPreviewUrl">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                  <span>Photo</span>
-                </div>
               </div>
               <div class="imam-upload-actions">
                 <input type="file" #imamInput (change)="onImamPhotoSelected($event)" accept="image/*" style="display:none">
-                <button type="button" class="btn-upload-imam" (click)="imamInput.click()">
-                  📷 {{ imamPreviewUrl ? 'Changer la photo' : 'Choisir une photo' }}
-                </button>
-                <button type="button" class="btn-remove-imam" *ngIf="imamPreviewUrl" (click)="removeImamPhoto()">
-                  ✕ Supprimer
-                </button>
-                <p class="upload-hint">JPG ou PNG — Recommandé : carré 200×200px</p>
+                <button type="button" class="btn-upload-imam" (click)="imamInput.click()">📷 Choisir</button>
               </div>
             </div>
           </div>
         </div>
       </section>
-    </div><!-- fin form-grid -->
+    </div>
 
     <div class="form-actions">
       <button type="button" class="btn-cancel" routerLink="/dashboard/mosquees">Annuler</button>

@@ -81,6 +81,12 @@ export interface Mosquee {
 }
 
 /** Payload JSON (création via part `data`, mise à jour via PUT) — sans imam.photoUrl */
+export interface AdminRequest {
+  email: string;
+  motDePasse?: string; // Optionnel : utilisé seulement si création
+  telephone?: string;
+}
+
 export interface MosqueeRequest {
   nom: Record<string, string>;
   description?: Record<string, string>;
@@ -90,10 +96,8 @@ export interface MosqueeRequest {
   contact?: Contact;
   equipements?: Equipements;
   horairesPriere?: HorairesPriere;
-  imam?: {
-    nom?: string;
-    bio?: string;
-  };
+  imam?: { nom?: string; bio?: string };
+  admin?: AdminRequest; // <-- AJOUT ICI
 }
 
 @Injectable({
