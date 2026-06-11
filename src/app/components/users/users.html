@@ -4,14 +4,23 @@
       <h2>Gestion des Utilisateurs</h2>
       <p>Consultez, modifiez le statut ou supprimez les membres de la plateforme.</p>
     </div>
-    <button class="refresh-btn" (click)="loadUsers()" [disabled]="isLoading">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18">
-        <path d="M23 4v6h-6"></path>
-        <path d="M1 20v-6h6"></path>
-        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-      </svg>
-      Actualiser
-    </button>
+    <div class="header-actions" style="display: flex; gap: 10px;">
+      <button class="refresh-btn" (click)="loadUsers()" [disabled]="isLoading">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18">
+          <path d="M23 4v6h-6"></path>
+          <path d="M1 20v-6h6"></path>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+        </svg>
+        Actualiser
+      </button>
+      <button *ngIf="isSuperAdmin()" class="btn-primary" (click)="openCreateForm()" style="display: flex; align-items: center; gap: 5px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Nouvel Utilisateur
+      </button>
+    </div>
   </div>
 
   <div class="error-banner" *ngIf="errorMessage">
@@ -51,7 +60,7 @@
             </span>
           </td>
           <td>
-            <div class="status-toggle" [class.disabled]="user.role === 'SUPER_ADMIN'" (click)="toggleStatus(user)">
+            <div class="status-toggle" [class.disabled]="user.role === 'SUPER_ADMIN' || !isSuperAdmin()" (click)="toggleStatus(user)">
               <div class="toggle-track" [class.active]="user.estActif">
                 <div class="toggle-thumb"></div>
               </div>
@@ -69,8 +78,9 @@
               <button 
                 class="btn-delete" 
                 (click)="onDeleteUser(user.id)" 
-                [disabled]="user.role === 'SUPER_ADMIN'"
-                [title]="user.role === 'SUPER_ADMIN' ? 'Impossible de supprimer un super administrateur' : 'Supprimer'"
+                *ngIf="isSuperAdmin()"
+                [disabled]="user.role === 'SUPER_ADMIN' || user.role === 'ROLE_SUPER_ADMIN'"
+                [title]="(user.role === 'SUPER_ADMIN' || user.role === 'ROLE_SUPER_ADMIN') ? 'Impossible de supprimer un super administrateur' : 'Supprimer'"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18">
                   <polyline points="3 6 5 6 21 6"></polyline>
@@ -128,6 +138,71 @@
       <div class="modal-footer">
         <button class="btn-primary" (click)="closeModal()">Fermer</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Modal Création Utilisateur -->
+  <div class="modal-overlay" *ngIf="showCreateForm" (click)="closeCreateForm()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Nouvel Utilisateur</h3>
+        <button class="close-btn" (click)="closeCreateForm()">&times;</button>
+      </div>
+      <form [formGroup]="createUserForm" (ngSubmit)="onSubmitCreate()">
+        <div class="modal-body" style="display: flex; flex-direction: column; gap: 15px;">
+          
+          <div class="form-group" style="display: flex; flex-direction: column;">
+            <label>Email *</label>
+            <input type="email" formControlName="email" class="form-control" placeholder="exemple@ikadeen.com">
+          </div>
+
+          <div class="form-group" style="display: flex; flex-direction: column;">
+            <label>Mot de passe *</label>
+            <input type="password" formControlName="motDePasse" class="form-control" placeholder="••••••••">
+          </div>
+
+          <div class="form-group" style="display: flex; flex-direction: column;">
+            <label>Téléphone</label>
+            <input type="text" formControlName="telephone" class="form-control" placeholder="+223...">
+          </div>
+
+          <div class="form-group" style="display: flex; flex-direction: column;">
+            <label>Rôle *</label>
+            <select formControlName="role" class="form-control">
+              <option value="UTILISATEUR">Utilisateur standard</option>
+              <option value="ADMIN">Administrateur</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="display: flex; flex-direction: column;" *ngIf="createUserForm.get('role')?.value === 'ADMIN'">
+            <label>Associer à des mosquées (Optionnel - Maintenez Ctrl/Cmd pour sélection multiple)</label>
+            <select formControlName="mosqueeIds" class="form-control" multiple style="height: 100px;">
+              <option *ngFor="let m of mosquees" [value]="m.id">
+                {{ m.nom['fr'] || m.nom['ar'] || 'Mosquée sans nom' }}
+              </option>
+            </select>
+          </div>
+
+          <div style="display: flex; gap: 15px; margin-top: 10px;">
+            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+              <input type="checkbox" formControlName="estActif">
+              Compte Actif
+            </label>
+            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+              <input type="checkbox" formControlName="estVerifie">
+              Email Vérifié
+            </label>
+          </div>
+
+        </div>
+        <div class="modal-footer" style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn-cancel" style="padding: 8px 16px; border: 1px solid #ccc; border-radius: 4px; cursor: pointer;" (click)="closeCreateForm()">Annuler</button>
+          <button type="submit" class="btn-primary" [disabled]="createUserForm.invalid || isSaving" style="padding: 8px 16px; border: none; border-radius: 4px; background-color: #007bff; color: white; cursor: pointer;">
+            <span *ngIf="!isSaving">Créer</span>
+            <div class="spinner" *ngIf="isSaving" style="width: 16px; height: 16px; border-width: 2px;"></div>
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

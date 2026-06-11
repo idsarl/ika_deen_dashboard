@@ -10,7 +10,7 @@ export interface User {
   id: string;
   email: string;
   telephone?: string;
-  role: 'ADMIN' | 'UTILISATEUR' | 'SUPER_ADMIN';
+  role: string;
   estActif: boolean;
   estVerifie: boolean;
 }
@@ -36,6 +36,14 @@ export class UserService {
   updateStatus(id: string, status: boolean): Observable<any> {
     // Le backend attend un paramètre de requête nommé 'active'
     return this.http.put(`${this.apiUrl}/${id}/status?active=${status}`, {});
+  }
+
+  /**
+   * Crée un nouvel utilisateur.
+   * Cette méthode attend un objet avec les détails de l'utilisateur.
+   */
+  createUser(userData: any): Observable<User> {
+    return this.http.post<User>(this.apiUrl, userData);
   }
 
   /**

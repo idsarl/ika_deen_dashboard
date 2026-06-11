@@ -89,7 +89,8 @@
           <span class="icon">🛡️</span>
           <h3>Gestion de l'Administrateur</h3>
         </div>
-        <div formGroupName="admin" class="admin-grid">
+        
+        <div *ngIf="isSuperAdmin()" formGroupName="admin" class="admin-grid">
           <div class="form-group">
             <label>Administrateur existant *</label>
             <select formControlName="email" class="form-control">
@@ -108,8 +109,18 @@
             <input type="text" formControlName="telephone">
           </div>
         </div>
-      </section>
 
+        <div *ngIf="!isSuperAdmin()" class="admin-grid">
+          <div class="form-group" formGroupName="admin">
+            <label>Administrateur responsable</label>
+            <input type="text" formControlName="email" readonly class="form-control" style="background-color: #f9f9f9; cursor: not-allowed;">
+          </div>
+          <p class="instruction" style="font-size: 0.85rem; color: #666;">
+            Contactez un Super Admin pour modifier l'assignation de cette mosquée.
+          </p>
+        </div>
+      </section>
+      
       <section class="form-section card full-width">
         <div class="section-title"><span class="icon">🖼️</span><h3>Photo de Couverture</h3></div>
         <div class="upload-zone" (click)="coverInput.click()">

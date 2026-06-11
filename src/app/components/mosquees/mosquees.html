@@ -8,7 +8,7 @@
       <button class="refresh-btn" (click)="loadMosquees()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
       </button>
-      <button class="add-btn" routerLink="/dashboard/mosquees/new">
+      <button *ngIf="isSuperAdmin()" class="add-btn" routerLink="/dashboard/mosquees/new">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         Nouvelle Mosquée
       </button>
@@ -45,6 +45,10 @@
           <span>Imam : {{ mosquee.imam.nom || 'Non renseigné' }}</span>
         </div>
 
+        <div class="info-row" style="margin-top: 5px;">
+          <small style="color: #666; font-size: 0.8em;">Admin : {{ mosquee.adminManager?.email || 'Non attribué' }}</small>
+        </div>
+
         <div class="equipements">
           <span [class.active]="mosquee.equipements.parking" title="Parking">P</span>
           <span [class.active]="mosquee.equipements.sectionFemmes" title="Section Femmes">F</span>
@@ -58,9 +62,18 @@
               <circle cx="12" cy="12" r="3"></circle>
             </svg>
           </button>
-          <button class="btn-edit" [routerLink]="['/dashboard/mosquees/edit', mosquee.id]">Modifier</button>
-          <button class="btn-delete" (click)="onDelete(mosquee.id!)">Supprimer</button>
+          
+          <button 
+            class="btn-edit" 
+            [routerLink]="canEdit(mosquee) ? ['/dashboard/mosquees/edit', mosquee.id] : null"
+            [disabled]="!canEdit(mosquee)"
+            [class.disabled-style]="!canEdit(mosquee)">
+            Modifier
+          </button>
+          
+          <button class="btn-delete" *ngIf="isSuperAdmin()" (click)="onDelete(mosquee.id!)">Supprimer</button>
         </div>
+       
       </div>
     </div>
   </div>
@@ -73,199 +86,6 @@
   <div class="empty-state" *ngIf="!isLoading && mosquees.length === 0">
     <div class="empty-icon">🕌</div>
     <h3>Aucune mosquée trouvée</h3>
-    <p>Commencez par en ajouter une à votre répertoire.</p>
   </div>
 
-  <!-- Modal Détails Mosquée -->
-  <div class="modal-overlay" *ngIf="selectedMosquee" (click)="closeModal()">
-    <div class="modal-content large-modal" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h3>Détails : {{ getNom(selectedMosquee) }}</h3>
-        <button class="close-btn" (click)="closeModal()">&times;</button>
-      </div>
-      <div class="modal-body scrollable-body">
-        <div class="mosquee-details-header">
-          <div class="mosquee-main-info">
-            <h4>{{ getNom(selectedMosquee) }}</h4>
-            <p class="arabic-text" *ngIf="selectedMosquee.nom['ar']">{{ selectedMosquee.nom['ar'] }}</p>
-          </div>
-          <div class="rating-info">
-            <span class="rating-val">{{ selectedMosquee.evaluationMoyenne }} ⭐</span>
-            <span class="avis-count">({{ selectedMosquee.nombreAvis }} avis)</span>
-          </div>
-        </div>
-
-        <div class="details-section">
-          <h5>📍 Localisation & Contact</h5>
-          <div class="details-grid">
-            <div class="detail-item"><label>Adresse</label><p>{{ selectedMosquee.adresse.rue }}, {{ selectedMosquee.adresse.ville }}</p></div>
-            <div class="detail-item"><label>Pays</label><p>{{ selectedMosquee.adresse.pays }}</p></div>
-            <div class="detail-item"><label>Téléphone</label><p>{{ selectedMosquee.contact.telephone || 'N/A' }}</p></div>
-            <div class="detail-item"><label>Email</label><p>{{ selectedMosquee.contact.email || 'N/A' }}</p></div>
-          </div>
-        </div>
-
-        <div class="details-section">
-          <h5>🕒 Horaires de Prière</h5>
-          <div class="times-details-grid">
-            <div class="time-box"><span>Fajr</span><strong>{{ selectedMosquee.horairesPriere.fajr }}</strong></div>
-            <div class="time-box"><span>Dhuhr</span><strong>{{ selectedMosquee.horairesPriere.dhuhr }}</strong></div>
-            <div class="time-box"><span>Asr</span><strong>{{ selectedMosquee.horairesPriere.asr }}</strong></div>
-            <div class="time-box"><span>Maghrib</span><strong>{{ selectedMosquee.horairesPriere.maghrib }}</strong></div>
-            <div class="time-box"><span>Isha</span><strong>{{ selectedMosquee.horairesPriere.isha }}</strong></div>
-            <div class="time-box active"><span>Jumu'a</span><strong>{{ selectedMosquee.horairesPriere.jumua }}</strong></div>
-          </div>
-        </div>
-
-        <div class="details-section">
-          <h5>👤 Imam</h5>
-          <div class="imam-details">
-            <div class="imam-photo" *ngIf="selectedMosquee.imam.photoUrl">
-              <img [src]="getImamPhotoUrl(selectedMosquee.imam.photoUrl)" alt="Photo Imam">
-            </div>
-            <div class="imam-text">
-              <h6>{{ selectedMosquee.imam.nom || 'Inconnu' }}</h6>
-              <p>{{ selectedMosquee.imam.bio || 'Pas de biographie disponible.' }}</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- SECTION ÉVÉNEMENTS -->
-        <div class="details-section events-container-section">
-          <div class="section-header-row">
-            <h5>📅 Événements de la Mosquée</h5>
-            <button class="btn-add-event" (click)="toggleEventForm()">
-              {{ showEventForm ? 'Annuler' : '+ Organiser un événement' }}
-            </button>
-          </div>
-
-          <!-- Formulaire de création d'événement -->
-          <div class="event-form-box card" *ngIf="showEventForm">
-            <h6>Nouvel Événement communautaire</h6>
-            <form [formGroup]="eventForm" (ngSubmit)="onSubmitEvent()">
-              <div class="form-group-grid">
-                <div class="input-box-form">
-                  <label>Titre de l'événement</label>
-                  <input type="text" formControlName="titre" placeholder="Ex: Conférence après le maghrib">
-                </div>
-                
-                <div class="input-box-form">
-                  <label>Date & Heure de début</label>
-                  <input type="datetime-local" formControlName="dateEvenement">
-                </div>
-              </div>
-
-              <div class="input-box-form full-width-input">
-                <label>Description / Détails</label>
-                <textarea formControlName="description" rows="3" placeholder="Présentez l'événement, les intervenants, le programme..."></textarea>
-              </div>
-
-              <!-- Upload image de couverture -->
-              <div class="input-box-form full-width-input file-upload-box">
-                <label>Image de couverture (Optionnelle)</label>
-                <div class="upload-dropzone" (click)="fileInput.click()">
-                  <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" style="display: none;">
-                  <div class="upload-prompt" *ngIf="!imagePreviewUrl">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                    <span>Cliquez pour choisir une photo d'illustration</span>
-                  </div>
-                  <div class="upload-preview" *ngIf="imagePreviewUrl">
-                    <img [src]="imagePreviewUrl" alt="Aperçu">
-                    <span class="change-badge">Changer de photo</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="form-actions">
-                <button type="submit" class="btn-submit-event" [disabled]="eventForm.invalid || isSavingEvent">
-                  {{ isSavingEvent ? 'Création en cours...' : 'Planifier l\'événement' }}
-                </button>
-              </div>
-            </form>
-          </div>
-
-          <!-- Liste des événements avec onglets -->
-          <div class="events-tabs" *ngIf="!isLoadingEvents">
-            <div class="tab-buttons">
-              <button 
-                class="tab-btn" 
-                [class.active]="activeEventTab === 'upcoming'"
-                (click)="activeEventTab = 'upcoming'">
-                🗓️ À venir
-                <span class="tab-count">{{ upcomingEvenements.length }}</span>
-              </button>
-              <button 
-                class="tab-btn" 
-                [class.active]="activeEventTab === 'past'"
-                (click)="activeEventTab = 'past'">
-                📜 Passés
-                <span class="tab-count">{{ pastEvenements.length }}</span>
-              </button>
-            </div>
-
-            <!-- Onglet À venir -->
-            <div class="events-list-box" *ngIf="activeEventTab === 'upcoming'">
-              <div class="event-card-item" *ngFor="let ev of upcomingEvenements">
-                <div class="event-img" *ngIf="ev.imageUrl">
-                  <img [src]="ev.imageUrl" alt="Affiche">
-                </div>
-                <div class="event-placeholder-img" *ngIf="!ev.imageUrl">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                </div>
-                <div class="event-details-text">
-                  <div class="ev-top">
-                    <h6>{{ ev.titre }}</h6>
-                    <span class="ev-date upcoming-badge">🕒 {{ ev.dateEvenement | date:'dd MMM yyyy à HH:mm' }}</span>
-                  </div>
-                  <p>{{ ev.description }}</p>
-                </div>
-                <button class="btn-delete-event" (click)="onDeleteEvent(ev.id!)" title="Supprimer">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                </button>
-              </div>
-              <div class="empty-events" *ngIf="upcomingEvenements.length === 0">
-                <div class="empty-events-icon">🗓️</div>
-                <p>Aucun événement prévu prochainement.</p>
-                <span>Utilisez le bouton "Organiser un événement" pour en planifier un.</span>
-              </div>
-            </div>
-
-            <!-- Onglet Passés -->
-            <div class="events-list-box" *ngIf="activeEventTab === 'past'">
-              <div class="event-card-item past-event" *ngFor="let ev of pastEvenements">
-                <div class="event-img" *ngIf="ev.imageUrl">
-                  <img [src]="ev.imageUrl" alt="Affiche">
-                </div>
-                <div class="event-placeholder-img" *ngIf="!ev.imageUrl">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                </div>
-                <div class="event-details-text">
-                  <div class="ev-top">
-                    <h6>{{ ev.titre }}</h6>
-                    <span class="ev-date past-badge">📅 {{ ev.dateEvenement | date:'dd MMM yyyy' }}</span>
-                  </div>
-                  <p>{{ ev.description }}</p>
-                </div>
-                <button class="btn-delete-event" (click)="onDeleteEvent(ev.id!)" title="Supprimer">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                </button>
-              </div>
-              <div class="empty-events" *ngIf="pastEvenements.length === 0">
-                <div class="empty-events-icon">📜</div>
-                <p>Aucun événement passé enregistré.</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="events-loading" *ngIf="isLoadingEvents">
-            <div class="spinner-mini"></div>
-            <span>Chargement des événements de la mosquée...</span>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-primary" (click)="closeModal()">Fermer</button>
-      </div>
-    </div>
   </div>
-</div>

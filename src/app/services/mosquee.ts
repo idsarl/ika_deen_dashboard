@@ -76,6 +76,8 @@ export interface Mosquee {
     bio: string;
     photoUrl: string;
   };
+  admin?: AdminRequest;
+  adminManager?: { id: string, email: string, telephone: string };
   evaluationMoyenne: number;
   nombreAvis: number;
 }
@@ -130,7 +132,7 @@ export class MosqueeService {
 
     formData.append(
       'data',
-      new Blob([JSON.stringify(data)], { type: 'application/json' })
+      JSON.stringify(data)
     );
 
     if (imamPhoto) {

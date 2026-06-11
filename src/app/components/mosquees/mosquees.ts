@@ -39,6 +39,30 @@ export class MosqueesComponent implements OnInit {
     this.initEventForm();
   }
 
+  isSuperAdmin(): boolean {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    // Si la clé localStorage est 'ika_user' il faut peut-être utiliser AuthService. 
+    // Pour l'instant, on se base sur la logique existante.
+    const ikaUser = JSON.parse(localStorage.getItem('ika_user') || '{}');
+    return user?.role === 'ROLE_SUPER_ADMIN' || user?.role === 'SUPER_ADMIN' || ikaUser?.role === 'ROLE_SUPER_ADMIN' || ikaUser?.role === 'SUPER_ADMIN';
+  }
+
+  /**
+   * Vérifie si l'utilisateur connecté a le droit de modifier cette mosquée.
+   * Droit accordé si ROLE_SUPER_ADMIN ou si l'email correspond.
+   */
+ canEdit(mosquee: Mosquee): boolean {
+  if (this.isSuperAdmin()) return true;
+  
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const ikaUser = JSON.parse(localStorage.getItem('ika_user') || '{}');
+  
+  const userEmail = user?.email || ikaUser?.email;
+  
+  // 2. Vérification si l'email de l'admin de la mosquée correspond à l'utilisateur connecté
+  return mosquee.adminManager?.email === userEmail && !!userEmail;
+}
+
   private initEventForm(): void {
     this.eventForm = this.fb.group({
       titre: ['', Validators.required],
@@ -82,7 +106,6 @@ export class MosqueesComponent implements OnInit {
       next: (data) => {
         this.evenements = data;
         const now = new Date();
-        // Tri et séparation : à venir vs passés
         this.upcomingEvenements = data
           .filter(e => new Date(e.dateEvenement) >= now)
           .sort((a, b) => new Date(a.dateEvenement).getTime() - new Date(b.dateEvenement).getTime());
@@ -112,8 +135,6 @@ export class MosqueesComponent implements OnInit {
     }
   }
 
-  // --- LOGIQUE DES ÉVÉNEMENTS ---
-
   toggleEventForm(): void {
     this.showEventForm = !this.showEventForm;
     if (!this.showEventForm) {
@@ -127,8 +148,6 @@ export class MosqueesComponent implements OnInit {
     const file = event.target.files[0];
     if (file) {
       this.selectedFile = file;
-      
-      // Création de l'URL pour prévisualisation locale de l'image
       const reader = new FileReader();
       reader.onload = () => {
         this.imagePreviewUrl = reader.result as string;
@@ -140,13 +159,7 @@ export class MosqueesComponent implements OnInit {
   formatDateTime(localDateTimeStr: string): string {
     if (!localDateTimeStr) return '';
     const dateObj = new Date(localDateTimeStr);
-    const year = dateObj.getFullYear();
-    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-    const day = String(dateObj.getDate()).padStart(2, '0');
-    const hours = String(dateObj.getHours()).padStart(2, '0');
-    const minutes = String(dateObj.getMinutes()).padStart(2, '0');
-    const seconds = '00';
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    return dateObj.toISOString(); // Format standard attendu par le backend
   }
 
   onSubmitEvent(): void {
@@ -163,8 +176,7 @@ export class MosqueesComponent implements OnInit {
       this.selectedMosquee.id!,
       this.selectedFile || undefined
     ).subscribe({
-      next: (newEvent) => {
-        // Recharger les événements pour mettre à jour les deux listes
+      next: () => {
         this.loadEvenements(this.selectedMosquee!.id!);
         this.isSavingEvent = false;
         this.toggleEventForm();
@@ -182,20 +194,16 @@ export class MosqueesComponent implements OnInit {
     if (confirm('Voulez-vous vraiment supprimer cet événement ?')) {
       this.evenementService.delete(eventId).subscribe({
         next: () => {
-          // Mise à jour des deux listes
-          this.evenements = this.evenements.filter(e => e.id !== eventId);
-          this.upcomingEvenements = this.upcomingEvenements.filter(e => e.id !== eventId);
-          this.pastEvenements = this.pastEvenements.filter(e => e.id !== eventId);
+          this.loadEvenements(this.selectedMosquee!.id!);
         },
         error: (err) => {
           console.error('Erreur suppression événement', err);
-          alert('Erreur lors de la suppression de l\'événement.');
+          alert('Erreur lors de la suppression.');
         }
       });
     }
   }
 
-  // Utilitaire pour obtenir le nom selon la langue (priorité FR, sinon AR)
   getNom(mosquee: Mosquee): string {
     return mosquee.nom['fr'] || mosquee.nom['ar'] || 'Sans nom';
   }

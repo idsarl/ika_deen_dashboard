@@ -25,8 +25,13 @@ export class UtilisateurService {
   getAdmins(): Observable<Utilisateur[]> {
     return this.http.get<Utilisateur[]>(this.apiUrl).pipe(
       map((utilisateurs: Utilisateur[]) => 
-        // On filtre ici : on ne garde que les objets ayant le rôle ADMIN
-        utilisateurs.filter(u => u.role === 'ADMIN')
+        // On filtre ici : on ne garde que les objets ayant le rôle ADMIN, ROLE_ADMIN, SUPER_ADMIN ou ROLE_SUPER_ADMIN
+        utilisateurs.filter(u => 
+          u.role === 'ADMIN' || 
+          u.role === 'ROLE_ADMIN' || 
+          u.role === 'SUPER_ADMIN' || 
+          u.role === 'ROLE_SUPER_ADMIN'
+        )
       )
     );
   }
