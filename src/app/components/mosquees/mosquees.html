@@ -73,7 +73,6 @@
           
           <button class="btn-delete" *ngIf="isSuperAdmin()" (click)="onDelete(mosquee.id!)">Supprimer</button>
         </div>
-       
       </div>
     </div>
   </div>
@@ -88,4 +87,145 @@
     <h3>Aucune mosquée trouvée</h3>
   </div>
 
+  <!-- ==================== MODAL DÉTAILS ==================== -->
+  <div class="modal-overlay" *ngIf="selectedMosquee" (click)="closeModal()">
+    <div class="modal-content large-modal" (click)="$event.stopPropagation()">
+      
+      <div class="modal-header">
+        <h3>Détails de la Mosquée</h3>
+        <button class="close-btn" (click)="closeModal()">✕</button>
+      </div>
+
+      <div class="scrollable-body">
+        
+        <!-- Header -->
+        <div class="mosquee-details-header">
+          <div class="mosquee-main-info">
+            <h4>{{ getNom(selectedMosquee) }}</h4>
+            <span class="arabic-text" *ngIf="selectedMosquee.nom['ar']">{{ selectedMosquee.nom['ar'] }}</span>
+          </div>
+          <div class="rating-info">
+            <div class="rating-val">
+              {{ selectedMosquee.evaluationMoyenne | number:'1.1-1' }} ★
+            </div>
+          </div>
+        </div>
+
+        <!-- Infos générales -->
+        <div class="details-section">
+          <h5>Informations Générales</h5>
+          <div class="details-grid">
+            <div class="detail-item">
+              <label>Ville / Pays</label>
+              <p>{{ selectedMosquee.adresse.ville }}, {{ selectedMosquee.adresse.pays }}</p>
+            </div>
+            <div class="detail-item">
+              <label>Adresse</label>
+              <p>{{ selectedMosquee.adresse.rue || 'Non renseignée' }}</p>
+            </div>
+            <div class="detail-item">
+              <label>Imam</label>
+              <p>{{ selectedMosquee.imam.nom || 'Non renseigné' }}</p>
+            </div>
+            <div class="detail-item">
+              <label>Administrateur</label>
+              <p>{{ selectedMosquee.adminManager?.email || 'Non attribué' }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Photo Imam -->
+        <div class="details-section" *ngIf="selectedMosquee.imam?.photoUrl">
+          <h5>Imam</h5>
+          <div class="imam-details">
+            <div class="imam-photo">
+              <img [src]="getImamPhotoUrl(selectedMosquee.imam.photoUrl)" alt="Photo Imam">
+            </div>
+            <div class="imam-text">
+              <h6>{{ selectedMosquee.imam.nom }}</h6>
+              <p>{{ selectedMosquee.imam.bio }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Événements -->
+        <div class="events-container-section">
+          <div class="section-header-row">
+            <h5>Événements</h5>
+            <button class="btn-add-event" (click)="toggleEventForm()">
+              + Nouvel événement
+            </button>
+          </div>
+
+          <!-- Formulaire -->
+          <div class="event-form-box" *ngIf="showEventForm">
+            <form [formGroup]="eventForm" (ngSubmit)="onSubmitEvent()">
+              <div class="form-group-grid">
+                <div class="input-box-form">
+                  <label>Titre</label>
+                  <input type="text" formControlName="titre" placeholder="Ex: Conférence sur le Ramadan">
+                </div>
+                <div class="input-box-form">
+                  <label>Date et heure</label>
+                  <input type="datetime-local" formControlName="dateEvenement">
+                </div>
+              </div>
+              
+              <div class="input-box-form">
+                <label>Description</label>
+                <textarea formControlName="description" rows="4" placeholder="Détails de l'événement..."></textarea>
+              </div>
+
+              <div class="input-box-form">
+                <label>Image (optionnelle)</label>
+                <input type="file" accept="image/*" (change)="onFileSelected($event)">
+                <div *ngIf="imagePreviewUrl" style="margin-top: 12px;">
+                  <img [src]="imagePreviewUrl" style="max-height: 200px; border-radius: 12px; width: 100%; object-fit: cover;">
+                </div>
+              </div>
+
+              <button type="submit" class="btn-submit-event" [disabled]="isSavingEvent">
+                {{ isSavingEvent ? 'Enregistrement en cours...' : 'Créer l\'événement' }}
+              </button>
+            </form>
+          </div>
+
+          <!-- Liste des événements -->
+          <div class="events-list-box">
+            <div *ngIf="activeEventTab === 'upcoming'">
+              <div class="event-card-item" *ngFor="let event of upcomingEvenements">
+                <div style="flex:1">
+                  <div class="ev-top">
+                    <strong>{{ event.titre }}</strong>
+                    <small>{{ event.dateEvenement | date:'dd/MM/yyyy HH:mm' }}</small>
+                  </div>
+                  <p>{{ event.description }}</p>
+                </div>
+                <button class="btn-delete-event" (click)="onDeleteEvent(event.id!)">🗑</button>
+              </div>
+              <p *ngIf="upcomingEvenements.length === 0" class="no-event">Aucun événement à venir</p>
+            </div>
+
+            <div *ngIf="activeEventTab === 'past'">
+              <div class="event-card-item" *ngFor="let event of pastEvenements">
+                <div style="flex:1">
+                  <div class="ev-top">
+                    <strong>{{ event.titre }}</strong>
+                    <small>{{ event.dateEvenement | date:'dd/MM/yyyy HH:mm' }}</small>
+                  </div>
+                  <p>{{ event.description }}</p>
+                </div>
+                <button class="btn-delete-event" (click)="onDeleteEvent(event.id!)">🗑</button>
+              </div>
+              <p *ngIf="pastEvenements.length === 0" class="no-event">Aucun événement passé</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-primary" (click)="closeModal()">Fermer</button>
+      </div>
+    </div>
   </div>
+</div>

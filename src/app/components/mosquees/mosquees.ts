@@ -41,27 +41,20 @@ export class MosqueesComponent implements OnInit {
 
   isSuperAdmin(): boolean {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    // Si la clé localStorage est 'ika_user' il faut peut-être utiliser AuthService. 
-    // Pour l'instant, on se base sur la logique existante.
     const ikaUser = JSON.parse(localStorage.getItem('ika_user') || '{}');
-    return user?.role === 'ROLE_SUPER_ADMIN' || user?.role === 'SUPER_ADMIN' || ikaUser?.role === 'ROLE_SUPER_ADMIN' || ikaUser?.role === 'SUPER_ADMIN';
+    return user?.role === 'ROLE_SUPER_ADMIN' || user?.role === 'SUPER_ADMIN' ||
+           ikaUser?.role === 'ROLE_SUPER_ADMIN' || ikaUser?.role === 'SUPER_ADMIN';
   }
 
-  /**
-   * Vérifie si l'utilisateur connecté a le droit de modifier cette mosquée.
-   * Droit accordé si ROLE_SUPER_ADMIN ou si l'email correspond.
-   */
- canEdit(mosquee: Mosquee): boolean {
-  if (this.isSuperAdmin()) return true;
-  
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-  const ikaUser = JSON.parse(localStorage.getItem('ika_user') || '{}');
-  
-  const userEmail = user?.email || ikaUser?.email;
-  
-  // 2. Vérification si l'email de l'admin de la mosquée correspond à l'utilisateur connecté
-  return mosquee.adminManager?.email === userEmail && !!userEmail;
-}
+  canEdit(mosquee: Mosquee): boolean {
+    if (this.isSuperAdmin()) return true;
+    
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const ikaUser = JSON.parse(localStorage.getItem('ika_user') || '{}');
+    const userEmail = user?.email || ikaUser?.email;
+    
+    return mosquee.adminManager?.email === userEmail && !!userEmail;
+  }
 
   private initEventForm(): void {
     this.eventForm = this.fb.group({
@@ -83,6 +76,12 @@ export class MosqueesComponent implements OnInit {
   closeModal(): void {
     this.selectedMosquee = null;
     this.evenements = [];
+    this.upcomingEvenements = [];
+    this.pastEvenements = [];
+    this.showEventForm = false;
+    this.selectedFile = null;
+    this.imagePreviewUrl = null;
+    this.eventForm.reset();
   }
 
   loadMosquees(): void {
@@ -159,7 +158,7 @@ export class MosqueesComponent implements OnInit {
   formatDateTime(localDateTimeStr: string): string {
     if (!localDateTimeStr) return '';
     const dateObj = new Date(localDateTimeStr);
-    return dateObj.toISOString(); // Format standard attendu par le backend
+    return dateObj.toISOString();
   }
 
   onSubmitEvent(): void {
