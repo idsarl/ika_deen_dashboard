@@ -1,0 +1,106 @@
+<div class="horaires-container">
+  <!-- EN-TÊTE -->
+  <div class="page-header">
+    <div class="header-info">
+      <h2>🕌 Gestion des Horaires de Prière</h2>
+      <p>Liste des villes et leurs horaires configurés.</p>
+    </div>
+    <div class="header-actions">
+      <button class="refresh-btn" (click)="chargerTousLesHoraires()" title="Actualiser">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18">
+          <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+        </svg>
+      </button>
+      <button class="add-btn" routerLink="/dashboard/horaires-priere/new">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Nouvelle ville
+      </button>
+    </div>
+  </div>
+
+  <!-- ERREUR -->
+  <div class="error-banner" *ngIf="errorMessage()">{{ errorMessage() }}</div>
+
+  <!-- CHARGEMENT -->
+  <div class="loading-state" *ngIf="loading()">
+    <div class="spinner"></div>
+    <p>Chargement des horaires...</p>
+  </div>
+
+  <!-- GRILLE DES CARTES -->
+  <div class="horaires-grid" *ngIf="!loading()">
+    <div class="horaire-card" *ngFor="let h of horairesList()">
+      <!-- Image / placeholder -->
+      <div class="card-image">
+        <div class="image-placeholder">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+          </svg>
+        </div>
+        <!-- Petit badge éventuel (ville courante ?) -->
+        <div class="city-badge" *ngIf="isCurrentCity(h.nomVille)">
+          📍 Actuelle
+        </div>
+      </div>
+
+      <!-- Contenu de la carte -->
+      <div class="card-content">
+        <div class="title-row">
+          <h3>{{ h.nomVille }}</h3>
+        </div>
+
+        <!-- Grille des horaires -->
+        <div class="times-grid">
+          <div class="time-box">
+            <span>Fajr</span>
+            <strong>{{ h.fajr }}</strong>
+          </div>
+          <div class="time-box">
+            <span>Dhuhr</span>
+            <strong>{{ h.dhuhr }}</strong>
+          </div>
+          <div class="time-box">
+            <span>Asr</span>
+            <strong>{{ h.asr }}</strong>
+          </div>
+          <div class="time-box">
+            <span>Maghrib</span>
+            <strong>{{ h.maghrib }}</strong>
+          </div>
+          <div class="time-box">
+            <span>Isha</span>
+            <strong>{{ h.isha }}</strong>
+          </div>
+        </div>
+
+        <!-- Footer avec boutons -->
+        <div class="card-footer">
+          <button class="btn-edit" [routerLink]="['/dashboard/horaires-priere/edit', h.nomVille]">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+            Modifier
+          </button>
+          <button class="btn-delete" (click)="deleteHoraires(h.nomVille)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            Supprimer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ÉTAT VIDE -->
+  <div class="empty-state" *ngIf="!loading() && horairesList().length === 0">
+    <div class="empty-icon">🕌</div>
+    <h3>Aucun horaire configuré</h3>
+    <p>Cliquez sur "Nouvelle ville" pour commencer.</p>
+  </div>
+</div>

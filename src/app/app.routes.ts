@@ -11,6 +11,8 @@ import { RadiosComponent } from './components/radios/radios';
 import { StatsComponent } from './components/stats/stats';
 import { ValidationComponent } from './components/validation/validation';
 import { authGuard } from './guards/auth-guard';
+import { HorairesPriere } from './components/horaires-priere/horaires-priere';
+import { HorairesFormComponent } from './components/horaires-priere/horaires-form/horaires-form';
 
 /**
  * Définition des routes de l'application.
@@ -37,6 +39,9 @@ export const routes: Routes = [
       { path: 'radios', component: RadiosComponent },
       { path: 'stats', component: StatsComponent },
       { path: 'validation', component: ValidationComponent },
+      { path: 'horaires-priere', component: HorairesPriere},
+      { path: 'horaires-priere/new', component: HorairesFormComponent }, // Ajouté
+      { path: 'horaires-priere/edit/:nomVille', component: HorairesFormComponent },
       { path: 'profile', component: ProfilComponent }
     ]
   },

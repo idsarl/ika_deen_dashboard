@@ -1,0 +1,51 @@
+<div class="horaires-container">
+  <div class="page-header">
+    <div class="header-info">
+      <h2>{{ isEditMode ? 'Modifier les horaires' : 'Nouvelle configuration' }}</h2>
+      <p>Configurez les heures de prière pour cette ville.</p>
+    </div>
+  </div>
+
+  <section class="form-card card">
+    <form [formGroup]="horaireForm" (ngSubmit)="onSubmit()" class="media-form">
+      
+      <div class="form-group">
+        <label>Nom de la ville *</label>
+        <input type="text" formControlName="nomVille" placeholder="Ex: Bamako">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Fajr</label>
+          <input type="time" formControlName="fajr">
+        </div>
+        <div class="form-group">
+          <label>Dhuhr</label>
+          <input type="time" formControlName="dhuhr">
+        </div>
+        <div class="form-group">
+          <label>Asr</label>
+          <input type="time" formControlName="asr">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Maghrib</label>
+          <input type="time" formControlName="maghrib">
+        </div>
+        <div class="form-group">
+          <label>Isha</label>
+          <input type="time" formControlName="isha">
+        </div>
+      </div>
+
+      <div class="form-actions" style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+        <button type="button" class="btn-secondary" routerLink="/dashboard/horaires-priere">Annuler</button>
+        <button type="submit" class="btn-submit" [disabled]="isSaving || horaireForm.invalid">
+          {{ isSaving ? 'Enregistrement...' : (isEditMode ? 'Mettre à jour' : 'Enregistrer') }}
+        </button>
+      </div>
+    </form>
+  </section>
+</div>
