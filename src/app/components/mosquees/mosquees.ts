@@ -134,14 +134,27 @@ export class MosqueesComponent implements OnInit {
     }
   }
 
-  toggleEventForm(): void {
-    this.showEventForm = !this.showEventForm;
-    if (!this.showEventForm) {
-      this.eventForm.reset();
-      this.selectedFile = null;
-      this.imagePreviewUrl = null;
-    }
+ toggleEventForm(): void {
+  if (!this.selectedMosquee) return;
+  if (!this.canManageEvents(this.selectedMosquee)) {
+    alert('Vous n\'êtes pas autorisé à créer des événements pour cette mosquée.');
+    return;
   }
+  this.showEventForm = !this.showEventForm;
+  if (!this.showEventForm) {
+    this.eventForm.reset();
+    this.selectedFile = null;
+    this.imagePreviewUrl = null;
+  }
+}
+
+  canManageEvents(mosquee: Mosquee): boolean {
+  if (this.isSuperAdmin()) return true;
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const ikaUser = JSON.parse(localStorage.getItem('ika_user') || '{}');
+  const userEmail = user?.email || ikaUser?.email;
+  return mosquee.adminManager?.email === userEmail && !!userEmail;
+}
 
   onFileSelected(event: any): void {
     const file = event.target.files[0];

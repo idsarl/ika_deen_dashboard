@@ -151,10 +151,13 @@
         <!-- Événements -->
         <div class="events-container-section">
           <div class="section-header-row">
-            <h5>Événements</h5>
-            <button class="btn-add-event" (click)="toggleEventForm()">
+             <h5>Événements</h5>
+             <button class="btn-add-event" 
+               (click)="toggleEventForm()"
+               [disabled]="!canManageEvents(selectedMosquee!)"
+              [class.disabled-style]="!canManageEvents(selectedMosquee!)">
               + Nouvel événement
-            </button>
+             </button>
           </div>
 
           <!-- Formulaire -->
