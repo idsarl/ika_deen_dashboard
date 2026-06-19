@@ -1,5 +1,4 @@
 <div class="validation-container">
-  <!-- EN-TÊTE -->
   <div class="page-header">
     <div class="header-info">
       <h2>Modération des contenus</h2>
@@ -14,16 +13,16 @@
     </div>
   </div>
 
-  <!-- ERREUR -->
+  <!-- Messages d'erreur -->
   <div class="error-banner" *ngIf="errorMessage">{{ errorMessage }}</div>
 
-  <!-- CHARGEMENT -->
+  <!-- Chargement -->
   <div class="loading-state" *ngIf="isLoading">
     <div class="spinner"></div>
     <p>Chargement des validations...</p>
   </div>
 
-  <!-- GRILLE -->
+  <!-- Liste des validations -->
   <div class="validation-grid" *ngIf="!isLoading">
     <div class="validation-card" *ngFor="let v of validations">
       <!-- En-tête -->
@@ -38,8 +37,31 @@
           <strong>{{ v.auteur.nom || 'Anonyme' }}</strong>
           <span *ngIf="v.auteur.email">({{ v.auteur.email }})</span>
         </div>
+
+        <!-- Affichage structuré du contenu -->
         <div class="content-preview">
-          <pre>{{ getContenuText(v.contenu) }}</pre>
+          <!-- Si c'est un commentaire, on affiche la mosquée, la note et le texte -->
+          <ng-container *ngIf="v.type === 'COMMENTAIRE' && v.contenu">
+            <div class="comment-content">
+              <div class="comment-mosquee">
+                <span class="label">Mosquée :</span>
+                <strong>{{ getMosqueeDisplay(v.contenu) }}</strong>
+              </div>
+              <div class="comment-note">
+                <span class="label">Note :</span>
+                <span class="stars">{{ v.contenu.note || '?' }}/5</span>
+              </div>
+              <div class="comment-texte" *ngIf="v.contenu.texte">
+                <p>{{ v.contenu.texte }}</p>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- Autres types (affichage générique) -->
+          <ng-container *ngIf="v.type !== 'COMMENTAIRE'">
+            <pre *ngIf="v.contenu">{{ v.contenu | json }}</pre>
+            <div *ngIf="!v.contenu" class="content-empty">Contenu vide</div>
+          </ng-container>
         </div>
       </div>
 
@@ -59,14 +81,13 @@
         </ng-template>
       </div>
 
-      <!-- Message si pas SUPER_ADMIN -->
       <div *ngIf="!isSuperAdmin()" class="no-permission">
         Vous n'avez pas les droits de modération.
       </div>
     </div>
   </div>
 
-  <!-- ÉTAT VIDE -->
+  <!-- État vide -->
   <div class="empty-state" *ngIf="!isLoading && validations.length === 0">
     <div class="empty-icon">✅</div>
     <h3>Aucune validation en attente</h3>
