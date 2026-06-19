@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { PubliciteService, Publicite } from '../../services/publicite';
 import { FileUploadService } from '../../services/file-upload';
 
@@ -54,6 +54,8 @@ export class PublicitesComponent implements OnInit {
   }
 
   toggleForm(): void {
+    // Seul le superAdmin peut ouvrir le formulaire
+    if (!this.isSuperAdmin()) return;
     this.showForm = !this.showForm;
     if (!this.showForm) {
       this.resetForm();
@@ -91,6 +93,9 @@ export class PublicitesComponent implements OnInit {
   }
 
   onSubmit(): void {
+    // Sécurité : seul un superAdmin peut créer
+    if (!this.isSuperAdmin()) return;
+
     if (!this.selectedImage) {
       alert('Veuillez sélectionner une image pour la bannière.');
       return;
@@ -121,6 +126,9 @@ export class PublicitesComponent implements OnInit {
   }
 
   onDelete(id: string): void {
+    // Sécurité : seul un superAdmin peut supprimer
+    if (!this.isSuperAdmin()) return;
+
     if (!confirm('Supprimer cette publicité ?')) return;
     this.publiciteService.delete(id).subscribe({
       next: () => {
@@ -136,5 +144,12 @@ export class PublicitesComponent implements OnInit {
   private resetForm(): void {
     this.publiciteForm.reset();
     this.removeImage();
+  }
+
+  isSuperAdmin(): boolean {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const ikaUser = JSON.parse(localStorage.getItem('ika_user') || '{}');
+    return user?.role === 'ROLE_SUPER_ADMIN' || user?.role === 'SUPER_ADMIN' ||
+           ikaUser?.role === 'ROLE_SUPER_ADMIN' || ikaUser?.role === 'SUPER_ADMIN';
   }
 }

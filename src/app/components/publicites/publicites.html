@@ -10,7 +10,8 @@
           <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
         </svg>
       </button>
-      <button class="add-btn" (click)="toggleForm()">
+      <!-- Bouton d'ajout visible uniquement pour SUPER_ADMIN -->
+      <button class="add-btn" *ngIf="isSuperAdmin()" (click)="toggleForm()">
         {{ showForm ? 'Annuler' : '+ Nouvelle bannière' }}
       </button>
     </div>
@@ -18,6 +19,7 @@
 
   <div class="error-banner" *ngIf="errorMessage">{{ errorMessage }}</div>
 
+  <!-- Le formulaire ne sera affiché que si showForm est vrai (et donc superAdmin) -->
   <section class="form-card card" *ngIf="showForm">
     <h3>Nouvelle bannière publicitaire</h3>
     <form [formGroup]="publiciteForm" (ngSubmit)="onSubmit()" class="media-form">
@@ -76,7 +78,10 @@
           <span class="label">Fin</span> {{ pub.dateFin }}
         </p>
         <p class="media-meta muted" *ngIf="!pub.lienDestination && !pub.dateFin">Aucun lien ni date de fin</p>
-        <button class="btn-delete" (click)="onDelete(pub.id!)">Supprimer</button>
+        <!-- Bouton Supprimer désactivé si non superAdmin -->
+        <button class="btn-delete" [disabled]="!isSuperAdmin()" (click)="onDelete(pub.id!)">
+          Supprimer
+        </button>
       </div>
     </article>
   </div>

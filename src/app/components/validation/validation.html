@@ -1,26 +1,75 @@
-<div class="validation-page">
-  <header>
-    <h2>Validation des contenus</h2>
-    <p>Modération des mosquées proposées, avis et signalements — en attente d'API backend.</p>
-  </header>
+<div class="validation-container">
+  <!-- EN-TÊTE -->
+  <div class="page-header">
+    <div class="header-info">
+      <h2>Modération des contenus</h2>
+      <p>Validez ou rejetez les contributions en attente (mosquées, commentaires, etc.).</p>
+    </div>
+    <div class="header-actions">
+      <button class="refresh-btn" (click)="loadPending()" [disabled]="isLoading" title="Actualiser">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18">
+          <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
 
-  <section class="placeholder-card card">
-    <div class="placeholder-icon">🛡️</div>
-    <h3>Module prêt côté interface</h3>
-    <p>
-      L'écran est préparé. Dès que le backend expose les routes ci-dessous,
-      on branchera la liste des contenus en attente et les actions Approuver / Refuser.
-    </p>
+  <!-- ERREUR -->
+  <div class="error-banner" *ngIf="errorMessage">{{ errorMessage }}</div>
 
-    <ul class="endpoint-list">
-      <li *ngFor="let ep of requiredEndpoints"><code>{{ ep }}</code></li>
-    </ul>
+  <!-- CHARGEMENT -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Chargement des validations...</p>
+  </div>
 
-    <p class="hint">
-      Indiquez aussi le format JSON d'un item (type, auteur, date, payload).
-      Voir <code>PLANNING.md</code> à la racine du projet.
-    </p>
+  <!-- GRILLE -->
+  <div class="validation-grid" *ngIf="!isLoading">
+    <div class="validation-card" *ngFor="let v of validations">
+      <!-- En-tête -->
+      <div class="validation-header">
+        <span class="validation-type">{{ v.type }}</span>
+        <span class="validation-date">{{ formatDate(v.date) }}</span>
+      </div>
 
-    <a routerLink="/dashboard/stats" class="btn-link">Voir les statistiques disponibles →</a>
-  </section>
+      <!-- Corps -->
+      <div class="validation-body">
+        <div class="author-info">
+          <strong>{{ v.auteur.nom || 'Anonyme' }}</strong>
+          <span *ngIf="v.auteur.email">({{ v.auteur.email }})</span>
+        </div>
+        <div class="content-preview">
+          <pre>{{ getContenuText(v.contenu) }}</pre>
+        </div>
+      </div>
+
+      <!-- Actions (uniquement pour SUPER_ADMIN) -->
+      <div class="validation-actions" *ngIf="isSuperAdmin()">
+        <button class="btn-approve" (click)="onApprove(v.id)">✅ Approuver</button>
+
+        <ng-container *ngIf="showRejectInputFor !== v.id; else rejectForm">
+          <button class="btn-reject" (click)="showReject(v.id)">❌ Rejeter</button>
+        </ng-container>
+        <ng-template #rejectForm>
+          <div class="reject-form">
+            <input type="text" [(ngModel)]="rejectMotif" placeholder="Motif (optionnel)" class="reject-input">
+            <button class="btn-reject-confirm" (click)="submitReject(v.id)">Confirmer</button>
+            <button class="btn-reject-cancel" (click)="cancelReject()">Annuler</button>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- Message si pas SUPER_ADMIN -->
+      <div *ngIf="!isSuperAdmin()" class="no-permission">
+        Vous n'avez pas les droits de modération.
+      </div>
+    </div>
+  </div>
+
+  <!-- ÉTAT VIDE -->
+  <div class="empty-state" *ngIf="!isLoading && validations.length === 0">
+    <div class="empty-icon">✅</div>
+    <h3>Aucune validation en attente</h3>
+    <p>Toutes les contributions ont été traitées.</p>
+  </div>
 </div>

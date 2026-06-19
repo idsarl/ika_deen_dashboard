@@ -5,15 +5,13 @@ import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-horaires-priere',
-  standalone: true, // Assurez-vous qu'il est bien standalone
+  standalone: true,
   imports: [CommonModule, RouterLink],
   templateUrl: './horaires-priere.html',
   styleUrl: './horaires-priere.css',
 })
 export class HorairesPriere implements OnInit {
   private horairesService = inject(HorairesService);
-  
-  // Utilisation de signaux pour gérer l'état
 
   horairesList = signal<HorairesVille[]>([]);
   loading = signal<boolean>(true);
@@ -23,19 +21,27 @@ export class HorairesPriere implements OnInit {
     this.chargerTousLesHoraires();
   }
 
+  // ----- Méthode de contrôle d'accès (copiée de MosqueesComponent) -----
+  isSuperAdmin(): boolean {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const ikaUser = JSON.parse(localStorage.getItem('ika_user') || '{}');
+    return user?.role === 'ROLE_SUPER_ADMIN' || user?.role === 'SUPER_ADMIN' ||
+           ikaUser?.role === 'ROLE_SUPER_ADMIN' || ikaUser?.role === 'SUPER_ADMIN';
+  }
+
+  // ----- Géolocalisation (inchangée) -----
   obtenirPosition() {
     if (!navigator.geolocation) {
       this.errorMessage.set('La géolocalisation n\'est pas supportée par votre navigateur.');
       this.loading.set(false);
       return;
     }
-
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
         this.chargerHoraires(latitude, longitude);
       },
-      (error) => {
+      () => {
         this.errorMessage.set('Impossible d\'obtenir votre position.');
         this.loading.set(false);
       }
@@ -48,7 +54,7 @@ export class HorairesPriere implements OnInit {
         this.horairesList.set([data]);
         this.loading.set(false);
       },
-      error: (err) => {
+      error: () => {
         this.errorMessage.set('Erreur lors du chargement des horaires.');
         this.loading.set(false);
       }
@@ -56,25 +62,29 @@ export class HorairesPriere implements OnInit {
   }
 
   chargerTousLesHoraires() {
-  this.loading.set(true);
-  this.horairesService.getAll().subscribe({
-    next: (data) => {
-      this.horairesList.set(data);
-      this.loading.set(false);
-    },
-    error: (err) => {
-      this.errorMessage.set('Erreur lors du chargement des horaires.');
-      this.loading.set(false);
-    }
-  });
-}
-deleteHoraires(nomVille: string) {
-   // Implémentez ici l'appel à votre service de suppression
-}
+    this.loading.set(true);
+    this.horairesService.getAll().subscribe({
+      next: (data) => {
+        this.horairesList.set(data);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.errorMessage.set('Erreur lors du chargement des horaires.');
+        this.loading.set(false);
+      }
+    });
+  }
 
-isCurrentCity(nomVille: string): boolean {
-  // À implémenter selon votre logique (par exemple, comparer avec la ville géolocalisée)
-  // Pour l'instant, on retourne false par défaut.
-  return false;
-}
+  // ----- Suppression (implémentée) -----
+  deleteHoraires(nomVille: string) {
+    
+    
+  }
+
+  // ----- Ville courante (à adapter selon votre logique) -----
+  isCurrentCity(nomVille: string): boolean {
+    // Exemple : comparer avec une ville stockée dans localStorage
+    // return localStorage.getItem('currentCity') === nomVille;
+    return false;
+  }
 }

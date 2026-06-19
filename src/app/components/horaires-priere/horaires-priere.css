@@ -225,6 +225,23 @@
   color: white;
   border-color: #ef4444;
 }
+/* Style des boutons désactivés */
+.btn-edit:disabled,
+.btn-delete:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #e5e7eb !important;
+  color: #9ca3af !important;
+  border-color: #d1d5db !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.btn-edit:disabled:hover,
+.btn-delete:disabled:hover {
+  background: #e5e7eb !important;
+  color: #9ca3af !important;
+}
 
 /* ==================== États ==================== */
 .error-banner {

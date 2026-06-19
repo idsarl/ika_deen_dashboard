@@ -10,7 +10,8 @@
           <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
         </svg>
       </button>
-      <button class="add-btn" (click)="toggleForm()">
+      <!-- Bouton d'ajout visible uniquement pour SUPER_ADMIN -->
+      <button class="add-btn" *ngIf="isSuperAdmin()" (click)="toggleForm()">
         {{ showForm ? 'Annuler' : '+ Nouvelle radio' }}
       </button>
     </div>
@@ -67,7 +68,10 @@
       <div class="media-body">
         <h3>{{ radio.nom }}</h3>
         <p class="stream-url" [title]="radio.urlStream">{{ radio.urlStream }}</p>
-        <button class="btn-delete" (click)="onDelete(radio.id!)">Supprimer</button>
+        <!-- Bouton Supprimer désactivé si non superAdmin -->
+        <button class="btn-delete" [disabled]="!isSuperAdmin()" (click)="onDelete(radio.id!)">
+          Supprimer
+        </button>
       </div>
     </article>
   </div>

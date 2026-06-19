@@ -328,6 +328,22 @@
   background: rgba(220, 38, 38, 0.15);
 }
 
+/* Style des boutons désactivés */
+.btn-delete:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #e5e7eb !important;
+  color: #9ca3af !important;
+  border-color: #d1d5db !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.btn-delete:disabled:hover {
+  background: #e5e7eb !important;
+  color: #9ca3af !important;
+}
+
 .loading-state,
 .empty-state {
   text-align: center;

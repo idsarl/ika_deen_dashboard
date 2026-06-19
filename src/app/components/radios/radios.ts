@@ -54,11 +54,13 @@ export class RadiosComponent implements OnInit {
   }
 
   toggleForm(): void {
-    this.showForm = !this.showForm;
-    if (!this.showForm) {
-      this.resetForm();
-    }
+  // Seul le superAdmin peut ouvrir le formulaire
+  if (!this.isSuperAdmin()) return;
+  this.showForm = !this.showForm;
+  if (!this.showForm) {
+    this.resetForm();
   }
+}
 
   onLogoSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -80,6 +82,8 @@ export class RadiosComponent implements OnInit {
   }
 
   onSubmit(): void {
+    if(!this.isSuperAdmin()) return;
+
     if (this.radioForm.invalid) return;
 
     this.isSaving = true;
@@ -106,6 +110,9 @@ export class RadiosComponent implements OnInit {
   }
 
   onDelete(id: string): void {
+    if(!this.isSuperAdmin()) return;
+
+
     if (!confirm('Supprimer cette radio ?')) return;
     this.radioService.delete(id).subscribe({
       next: () => {
@@ -121,5 +128,12 @@ export class RadiosComponent implements OnInit {
   private resetForm(): void {
     this.radioForm.reset();
     this.removeLogo();
+  }
+
+  isSuperAdmin(): boolean {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const ikaUser = JSON.parse(localStorage.getItem('ika_user') || '{}');
+    return user?.role === 'ROLE_SUPER_ADMIN' || user?.role === 'SUPER_ADMIN' ||
+           ikaUser?.role === 'ROLE_SUPER_ADMIN' || ikaUser?.role === 'SUPER_ADMIN';
   }
 }
